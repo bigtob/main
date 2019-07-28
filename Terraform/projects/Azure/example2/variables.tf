@@ -1,0 +1,19 @@
+# Define all variables here
+variable "subscriptionid" {}
+variable "tenantid" {}
+variable "clientid" {}
+variable "clientsecret" {}
+variable "env" {}
+variable "directorate" {}
+variable "subdirectorate" {}
+variable "projectcode" {}
+variable "costcentre" {}
+variable "irnumber" {}
+variable "supportteam1" {}
+variable "supportteam2" {}
+variable "lifecyclestatus" {}
+variable "location" {}
+variable "vnetname" {}
+variable "versionno" {}
+variable "service" {}
+variable "servicehours" {}
