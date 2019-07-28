@@ -98,7 +98,7 @@ DEPLOY
     "location" = "${var.location}"
     "sqlserver" = "${var.sqlserver}"
     "securitytorageaccount" = "${var.sqlsecuritysa}"
-    "emailAddresses" = "me@mydomain.com"
+    "emailAddresses" = "you@yourdomain.com"
     "sqldb" = "${azurerm_sql_database.sqldb.name}"
   }
   deployment_mode = "Incremental"
