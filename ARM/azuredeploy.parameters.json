@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "location": {
+        "value": "[resourceGroup().location]"
+      },
+      "virtualNetworkName": {
+        "value": "myVNet" 
+      },
+      "virtualNetworkAddressPrefix": {
+        "value": "10.0.0.0/16"
+      },
+      "subnet1Prefix": {
+        "value": "10.0.1.0/24"
+      },
+      "subnet1Name": {
+        "value": "mySubnet"
+      },
+      "loadBalancerName": {
+        "value": "myiLB"
+      },
+      "storageAccountType": {
+        "value": "Standard_LRS"
+      }
+    }
+  }
+  
