@@ -4,24 +4,28 @@
     "parameters": {
       "virtualNetworkName": {
         "type": "string",
+        "defaultValue": "defaultVNet",
         "metadata": {
           "description": "Virtual Network name."
         }
       },
       "virtualNetworkAddressPrefix": {
         "type": "string",
+        "defaultValue": "10.1.0.0/16",
         "metadata": {
           "description": "Virtual Network address prefix."
         }
       },
       "subnet1Prefix": {
         "type": "string",
+        "defaultValue": "10.1.1.0/24",
         "metadata": {
           "description": "Subnet 1 prefix."
         }
       },
       "subnet1Name": {
         "type": "string",
+        "defaultValue": "defaultSubnet",
         "metadata": {
           "description": "Subnet 1 name."
         }

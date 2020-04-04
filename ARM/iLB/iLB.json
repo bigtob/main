@@ -11,18 +11,21 @@
       },
       "loadBalancerName": {
         "type": "string",
+        "defaultValue": "defaultILB",
         "metadata": {
           "description": "Name for the load balancer."
         }
       },
       "virtualNetworkName": {
         "type": "string",
+        "defaultValue": "defaultVNet",
         "metadata": {
           "description": "Name of the target virtual network."
         }
       },
       "subnetName": {
         "type": "string",
+        "defaultValue": "defaultSubnet",
         "metadata": {
           "description": "Name of the target subnet."
         }
