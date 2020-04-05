@@ -31,6 +31,18 @@
         "metadata": {
           "description": "Subnet 1 name."
         }
+      },
+      "loadBalancerName": {
+        "value": "myiLB",
+        "metadata": {
+          "description": "Name for the load balancer."
+        }
+      },
+      "storageAccountType": {
+        "value": "Standard_LRS",
+        "metadata": {
+          "description": "Storage Account type"
+        }
       }
     }
 }
