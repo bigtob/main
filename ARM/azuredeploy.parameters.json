@@ -3,26 +3,67 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
       "location": {
-        "value": "[resourceGroup().location]"
+        "type": "string",
+        "value": "[resourceGroup().location]",
+        "metadata": {
+        "description": "Location for all resources."
+        }
       },
       "virtualNetworkName": {
-        "value": "myVNet" 
+        "type": "string",
+        "value": "myVNet",
+        "defaultValue": "defaultVNet",
+        "metadata": {
+          "description": "Virtual Network name."
+        }
       },
       "virtualNetworkAddressPrefix": {
-        "value": "10.0.0.0/16"
+        "type": "string",
+        "value": "10.0.0.0/16",
+        "defaultValue": "10.1.0.0/16",
+        "metadata": {
+          "description": "Virtual Network address prefix."
+        }
       },
       "subnet1Prefix": {
-        "value": "10.0.1.0/24"
+        "type": "string",
+        "value": "10.0.1.0/24",
+        "defaultValue": "10.1.0.0/24",
+        "metadata": {
+          "description": "Subnet 1 prefix."
+        }
       },
       "subnet1Name": {
-        "value": "mySubnet"
+        "type": "string",
+        "value": "mySubnet",
+        "defaultValue": "defaultSubnet",
+        "metadata": {
+          "description": "Subnet 1 name."
+        }
       },
       "loadBalancerName": {
-        "value": "myiLB"
+        "type": "string",
+        "value": "myiLB",
+        "defaultValue": "defaultILB",
+        "metadata": {
+          "description": "Name for the load balancer."
+        }
       },
       "storageAccountType": {
-        "value": "Standard_LRS"
+        "type": "string",
+        "value": "Standard_LRS",
+        "defaultValue": "Standard_LRS",
+        "allowedValues": [
+          "Standard_LRS",
+          "Standard_GRS",
+          "Standard_ZRS",
+          "Premium_LRS"
+        ],
+        "metadata": {
+          "description": "Storage Account type"
+        }
       }
     }
-  }
+}
+
   
