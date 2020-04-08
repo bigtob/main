@@ -43,7 +43,7 @@
             "bypass": "AzureServices",
             "virtualNetworkRules": [
               {
-                "id": "[reference('subnetId').outputs.subnetId.value]",
+                "id": "[reference('vNetSubnet').outputs.subnetId.value]",
                 "action": "Allow"
               }
             ],
