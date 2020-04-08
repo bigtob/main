@@ -16,7 +16,7 @@
             "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/Network/1vnet1subnet.json"
           },
           "parametersLink": {
-            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/1vnet1subnet.parameters.json"
+            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/Network/1vnet1subnet.parameters.json"
           }
         }
       },
