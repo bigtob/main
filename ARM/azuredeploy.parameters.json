@@ -31,6 +31,12 @@
         "metadata": {
           "description": "Subnet 1 name."
         }
+      },
+      "storageAccountType": {
+        "value": "Standard_LRS",
+        "metadata": {
+          "description": "Storage Account type"
+        }
       }
     }
 }

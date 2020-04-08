@@ -19,6 +19,23 @@
             "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/azuredeploy.parameters.json"
           }
         }
+      },
+      {
+        "name": "storageAccount",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/Storage%20Account/storage.json"
+          },
+          "parametersLink": {
+            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/azuredeploy.parameters.json"
+          }
+        },
+        "dependsOn": [
+          "vNetSubnet"
+        ]
       }
     ],
     "outputs": {
