@@ -29,8 +29,13 @@
           "templateLink": {
             "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/StorageAccount/storageaccount.json"
           },
-          "parametersLink": {
-            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/StorageAccount/storageaccount.parameters.json"
+          "parameters": {
+            "storageAccountType": {
+              "value": "Standard_LRS"
+            },
+            "subnetId": {
+              "value": "[reference('vNetSubnet').outputs.subnetId.value]"
+            }
           }
         },
         "dependsOn": [
