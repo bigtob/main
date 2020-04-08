@@ -38,7 +38,18 @@
           "name": "[variables('storageAccountType')]"
         },
         "kind": "StorageV2",
-        "properties": {}
+        "properties": {
+          "networkAcls": {
+            "bypass": "AzureServices",
+            "virtualNetworkRules": [
+              {
+                "id": "[reference('storageAccount').outputs.subnetId.value]",
+                "action": "Allow"
+              }
+            ],
+            "defaultAction": "deny"
+          }
+        }
       }
     ],
     "outputs": {

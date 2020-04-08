@@ -16,7 +16,7 @@
             "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/Network/1vnet1subnet.json"
           },
           "parametersLink": {
-            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/azuredeploy.parameters.json"
+            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/1vnet1subnet.parameters.json"
           }
         }
       },
@@ -27,10 +27,10 @@
         "properties": {
           "mode": "Incremental",
           "templateLink": {
-            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/Storage%20Account/storage.json"
+            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/StorageAccount/storageaccount.json"
           },
           "parametersLink": {
-            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/azuredeploy.parameters.json"
+            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/StorageAccount/storageaccount.parameters.json"
           }
         },
         "dependsOn": [
