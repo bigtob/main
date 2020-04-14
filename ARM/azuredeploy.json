@@ -41,7 +41,32 @@
         "dependsOn": [
           "vNetSubnet"
         ]
-      }
+      },
+      {
+        "name": "iLB",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2018-05-01",
+        "properties": {
+          "mode": "Incremental",
+          "templateLink": {
+            "uri": "https://raw.githubusercontent.com/bigtob/main/master/ARM/iLB/iLB.json"
+          },
+          "parameters": {
+            "loadBalancerName": {
+              "value": "myiLB" 
+            },
+            "virtualNetworkName": {
+              "value": "[reference('vNetSubnet').outputs.vnetId.value]"
+            },
+            "subnetName": {
+              "value": "[reference('vNetSubnet').outputs.subnetId.value]"
+            }
+          }
+        },
+        "dependsOn": [
+          "vNetSubnet"
+        ]
+      }  
     ],
     "outputs": {
     }
