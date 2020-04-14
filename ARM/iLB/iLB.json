@@ -16,13 +16,6 @@
           "description": "Name for the load balancer."
         }
       },
-      "virtualNetworkName": {
-        "type": "string",
-        "defaultValue": "defaultVNet",
-        "metadata": {
-          "description": "Name of the target virtual network."
-        }
-      },
       "subnetName": {
         "type": "string",
         "defaultValue": "defaultSubnet",
@@ -34,7 +27,6 @@
     "variables": {
       "location": "[parameters('location')]",
       "loadBalancerName": "[parameters('loadBalancerName')]",
-      "virtualNetworkName": "[parameters('virtualNetworkName')]",
       "subnetName": "[parameters('subnetName')]"
     },
     "resources": [
@@ -43,9 +35,6 @@
       "name": "[variables('loadBalancerName')]",
       "type": "Microsoft.Network/loadBalancers",
       "location": "[variables('location')]",
-      "dependsOn": [
-        "[variables('virtualNetworkName')]"
-      ],
       "properties": {
         "frontendIPConfigurations": [
           {

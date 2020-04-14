@@ -55,9 +55,6 @@
             "loadBalancerName": {
               "value": "myiLB" 
             },
-            "virtualNetworkName": {
-              "value": "[reference('vNetSubnet').outputs.vnetId.value]"
-            },
             "subnetName": {
               "value": "[reference('vNetSubnet').outputs.subnetId.value]"
             }
