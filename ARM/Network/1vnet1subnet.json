@@ -68,7 +68,12 @@
               "[variables('virtualNetworkName')]"
             ],
             "properties": {
-              "addressPrefix": "[variables('subnet1Prefix')]"
+              "addressPrefix": "[variables('subnet1Prefix')]",
+              "serviceEndpoints": [
+                {
+                  "service": "Microsoft.Storage"    
+                }
+              ]
             }
           }
         ]
