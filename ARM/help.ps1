@@ -1,3 +1,7 @@
+################
+## POWERSHELL ##
+################
+
 # Setup PowerShell environment (as admin)
 Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 Install-Module PowerShellGet -Force
@@ -15,7 +19,7 @@ Get-AzSubscription
 
 #Name       Id                                   TenantId                             State
 #----       --                                   --------                             -----
-#Free Trial 59685ae4-813b-4824-bca1-8e5be03ad959 b2ad35c6-030b-47d4-bfbf-b41a6859f311 Enabled
+#Free Trial a b2ad35c6-030b-47d4-bfbf-b41a6859f311 Enabled
 
 # Set Subscription context
 Set-AzContext -SubscriptionId "59685ae4-813b-4824-bca1-8e5be03ad959"
@@ -31,54 +35,13 @@ New-AzResourceGroupDeployment -ResourceGroupName test-rsg -TemplateFile .\azured
 # Delete Resource Group
 Remove-AzResourceGroup -name "test-rsg" -Force
 
-"virtualNetworkName": {
-    "type": "string",
-    "metadata": {
-      "description": "Virtual Network name."
-    }
-  },
-  "virtualNetworkAddressPrefix": {
-    "type": "string",
-    "metadata": {
-      "description": "Virtual Network address prefix."
-    }
-  },
-  "subnet1Prefix": {
-    "type": "string",
-    "metadata": {
-      "description": "Subnet 1 prefix."
-    }
-  },
-  "subnet1Name": {
-    "type": "string",
-    "metadata": {
-      "description": "Subnet 1 name."
-    }
-  },
-  "location": {
-    "type": "string",
-    "metadata": {
-      "description": "Location for all resources."
-    }
-  },
-  "storageAccountType": {
-    "type": "string",
-    "defaultValue": "Standard_LRS",
-    "allowedValues": [
-      "Standard_LRS",
-      "Standard_GRS",
-      "Standard_ZRS",
-      "Premium_LRS"
-    ],
-    "metadata": {
-      "description": "Storage Account type"
-    }
-  },
-  "loadBalancerName": {
-    "type": "string",
-    "metadata": {
-      "description": "Name for the load balancer."
-    }
-  }
+##############
+### AZ CLI ###
+##############
+# Create Azure Container Registry
+az acr create -n tobytestacr -g test-eastus-rsg --sku basic
+az acr update -n tobytestacr --admin-enabled true
 
-  Fixing master parameter file
+# AKS
+az aks show
+az aks install-cli # set path with $env:path += 'C:\Users\sleaz\.azure-kubectl'

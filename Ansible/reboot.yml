@@ -1,0 +1,8 @@
+# SYNTAX: reboot.yml -e "host=<hostname|hostgroup>"
+# PURPOSE: Reboot hosts 
+---
+  - hosts: '{{ host }}'
+    gather_facts: yes
+    roles:
+      - reboot
+...

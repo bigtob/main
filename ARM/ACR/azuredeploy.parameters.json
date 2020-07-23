@@ -1,0 +1,42 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "subscriptionId": {
+            "value": "59685ae4-813b-4824-bca1-8e5be03ad959"
+        },
+        "name": {
+            "value": "tobytestphpcontainer"
+        },
+        "location": {
+            "value": "East US"
+        },
+        "hostingEnvironment": {
+            "value": ""
+        },
+        "hostingPlanName": {
+            "value": "myASP"
+        },
+        "serverFarmResourceGroup": {
+            "value": "test-eastus-rsg"
+        },
+        "alwaysOn": {
+            "value": false
+        },
+        "linuxFxVersion": {
+            "value": "DOCKER|tobytestacr.azurecr.io/php7:7"
+        },
+        "dockerRegistryUrl": {
+            "value": "https://tobytestacr.azurecr.io"
+        },
+        "dockerRegistryUsername": {
+            "value": "tobytestacr"
+        },
+        "dockerRegistryPassword": {
+            "value": null
+        },
+        "dockerRegistryStartupCommand": {
+            "value": ""
+        }
+    }
+}

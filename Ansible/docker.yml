@@ -1,0 +1,8 @@
+# SYNTAX: docker.yml -e "host=<hostname|hostgroup>"
+# PURPOSE: Installs and starts docker
+---
+  - hosts: '{{ host }}'
+    gather_facts: yes
+    roles:
+      - docker
+...

@@ -1,0 +1,6 @@
+[master]
+centos1 # Main server 
+
+[slave]
+centos2 # Slave1
+centos3 # Slave2

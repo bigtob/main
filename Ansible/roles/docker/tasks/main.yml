@@ -1,0 +1,22 @@
+---
+- name: Install yum-utils
+  yum: state=present name=yum-utils
+
+- name: Configure yum timeout in /etc/yum.conf
+  lineinfile: insertafter=^distroverpkg line='timeout=120' path=/etc/yum.conf
+
+- name: Configure the docker repository
+  shell: "[[ ! -f /etc/yum.repos.d/docker-ce.repo ]] && yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo || true"
+
+- name: Install docker
+  yum: state=present name=docker-ce,docker-ce-cli,containerd.io 
+
+- name: Start and enable docker
+  systemd: name=docker state=started enabled=yes
+
+- name: Download docker compose
+  get_url: dest=/usr/local/bin/docker-compose mode=0750 url=https://github.com/docker/compose/releases/download/1.25.5/docker-compose-Linux-x86_64
+
+- name: Set executable bit on /usr/local/bin/docker-compose
+  file: path=/usr/local/bin/docker-compose mode=0750
+...

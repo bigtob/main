@@ -1,0 +1,118 @@
+# Add Ansible repo on centos1
+yum install -y centos-release-ansible-29
+
+# Install Ansible on centos1
+yum install -y ansible
+
+# Setup hosts on centos1
+echo "ubuntu1" >> /etc/ansible/hosts
+
+# Add user on ubuntu1
+adduser --gecos "User for Ansible automation" ansible # password is ansible
+
+# Setup ssh access from root@centos1 to [root|ansible]@ubuntu1
+ssh-copy-id -i /root/.ssh/id_rsa.pub ansible@ubuntu1
+sed -i '/^\#PermitRootLogin.*/a PermitRootLogin yes' /etc/ssh/sshd_config
+systemctl restart sshd
+ssh-copy-id -i /root/.ssh/id_rsa.pub ubuntu1
+ssh ansible@ubuntu1 date
+ssh ubuntu1 date
+
+# -------------------------
+# Test Ansible from centos1
+# -------------------------
+ansible -m ping all -e ansible_user=ansible # can also just use --user ansible here
+ansible -m ping all
+
+# --------------------------------------
+# Install collection from Ansible galaxy
+# --------------------------------------
+# https://galaxy.ansible.com/fiaasco/icinga2 
+# Other useful links: 
+# https://gitlab.com/bodsch/ansible-icinga2
+# https://git.coop/webarch/icinga-network
+# https://git.coop/webarch/icinga
+# https://git.coop/webarch/icingaweb
+
+# cd /root/.ansible/collections/ansible_collections/fiaasco/icinga2
+# ansible-galaxy install -r requirements.yml # this will install the [mariadb|php7|apache] roles from "fiaasco" (though these only seem to be used on Debian installations)
+
+# -----------------------
+# Prepare master playbook
+# -----------------------
+create an inventory file 'icinga_hosts', using yml format and [group_vars|host_vars] directories and .yml files in each with details.
+ansible -m ping all -i icinga2_hosts
+ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml
+
+# -----------------------
+# Install master playbook
+# -----------------------
+ansible-playbook -i icinga2_hosts ./playbooks/icinga2-master.yml
+firewall-cmd --add-service=http --permanent  # added to icinga2_icingaweb2 role
+firewall-cmd --add-service=https --permanent # added to icinga2_icingaweb2 role
+firewall-cmd --reload                        # added to icinga2_icingaweb2 role
+firewall-cmd --list-services
+
+Now browse to http://192.168.1.203/icingaweb2/authentication/login (icingaadmin/password)
+
+# ----------------
+# MariaDB commands
+# ----------------
+mysql
+show databases;
+connect icingaweb;
+show tables;
+select * from icingaweb_user ;
+
+# ------------------------------------------
+# Generate a new salt and encrypted password
+# ------------------------------------------
+salt=$(openssl rand -base64 6)
+openssl passwd -1 -salt $salt password
+$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0
+UPDATE icingaweb_user SET password_hash='$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0' WHERE name = 'icingaadmin';
+mysql -u icingaweb --password=password
+
+# --------------------------
+# Install satellite playbook
+# --------------------------
+Code copied to /etc/ansible/icinga and tidied up a little
+Moved roles dir into playbooks dir
+centos82 added to icinga2_hosts as satellite server
+cd /etc/ansible/icinga2
+ansible-playbook -i icinga2_hosts ./playbooks/icinga2-satellite.yml
+
+Issues: 
+1) ansible_fqdn fact HAS to match hostname -f command, and be the same in the inventory ?? Check this
+edited /etc/ansible/icinga2/playbooks/roles/icinga2_client/tasks/main.yml 
+
+2) delegated icinga2 restart on centos81 sometimes fails - normally works with /usr/lib/icinga2/safe-reload
+
+# --------------------------
+# Install client playbook
+# --------------------------
+Issues: icinga2_hosts group configured as icinga2satclient not icinga2client
+ansible-playbook -i icinga2_hosts ./playbooks/icinga2-client.yml
+
+Issues:
+RUNNING HANDLER [icinga2_hostconfig : reload master icinga2] *************************************
+failed: [ubuntu1 -> centos81] (item=centos81) => {"ansible_loop_var": "item", "changed": false, "item": 
+"centos81", "msg": "Unable to reload service icinga2: Job for icinga2.service failed.\nSee \"systemctl status icinga2.service\" and \"journalctl -xe\" for details.\n"}
+
+# -----------------------
+# icinga2 troubleshooting
+# -----------------------
+centos81 = master
+centos82 = satellite
+ubunt1 = client
+
+icinga2 daemon -C # performs configuration checks
+icinga2 object list --type host
+icinga2 object list --type endpoint
+icinga2 ca list --all # list pending signing requests
+icinga2 ca sign [[fingerprint]] # sign the request
+
+icinga2 node wizard # manually sort the connection
+
+ubuntu1 still showing as pending
+https://icinga.com/docs/icinga2/latest/doc/06-distributed-monitoring/#on-demand-csr-signing-on-the-master

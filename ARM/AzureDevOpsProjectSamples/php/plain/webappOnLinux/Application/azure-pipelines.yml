@@ -1,0 +1,61 @@
+# PHP as Linux Web App on Azure
+# Build, package and deploy your PHP project to Azure Linux Web App.
+# Add steps that run tests and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/php
+
+trigger:
+  branches: 
+    include: 
+    - master
+  paths:
+    include: 
+    - AzureDevOpsProjectSamples/php/plain/webappOnLinux/Application/*
+
+variables:
+  # Azure Resource Manager connection created during pipeline creation
+  azureSubscription: '5e213a19-d15d-43d5-aa7e-cb9831b3798f'
+  
+  # Web app name
+  webAppName: 'tobytestphp'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+  # Environment name
+  environmentName: 'tobytestphp'
+
+  # Root folder under which your php code is available
+  rootFolder: $(System.DefaultWorkingDirectory)/AzureDevOpsProjectSamples/php/plain/webappOnLinux/Application
+
+stages:
+- stage: Build
+  displayName: Build stage
+  variables:
+    phpVersion: '7.3'
+  jobs:
+  - job: BuildJob
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - script: |
+        sudo update-alternatives --set php /usr/bin/php$(phpVersion)
+        sudo update-alternatives --set phar /usr/bin/phar$(phpVersion)
+        sudo update-alternatives --set phpdbg /usr/bin/phpdbg$(phpVersion)
+        sudo update-alternatives --set php-cgi /usr/bin/php-cgi$(phpVersion)
+        sudo update-alternatives --set phar.phar /usr/bin/phar.phar$(phpVersion)
+        php -version
+      workingDirectory: $(rootFolder)
+      displayName: 'Use PHP version $(phpVersion)'
+    
+    - task: ArchiveFiles@2
+      displayName: 'Archive files'
+      inputs:
+        rootFolderOrFile: '$(rootFolder)'
+        includeRootFolder: false
+        archiveType: zip
+        archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+        replaceExistingArchive: true
+    
+    - publish: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+      displayName: 'Upload package'
+      artifact: webapponlinux

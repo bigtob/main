@@ -1,0 +1,34 @@
+---
+- name: Stop and disable firewalld
+  systemd: name=firewalld state=stopped enabled=no 
+
+- name: Set SELinux to permissive
+  selinux: policy=targeted state=permissive
+
+- name: Time and date set-up
+  shell: "timedatectl set-timezone Europe/London"
+
+- name: Add set -o vi in .bashrc
+  lineinfile: path=/root/.bashrc state=present line='set -o vi' 
+
+- name: Install CIFS and BIND utils
+  yum: name=cifs-utils,bind-utils state=installed 
+
+- name: Create credentials file for CIFS mount from NAS
+  lineinfile: create=yes state=present path=/root/NAS_credentials.txt mode=0600 line="{{ item }}"
+  with_items:
+    - username=admin
+    - password=yasmine
+
+- name: Create /NAS directories
+  file: path=/NAS/{{ item }} state=directory owner=root group=root mode=0750  
+  with_items:
+    - Docker
+    - Code
+
+- name: Mount //NAS/Docker and //NAS/Code
+  mount: fstype=cifs path=/NAS/{{ item }} src=//NAS/NAS/{{ item }} state=mounted opts=rw,credentials=/root/NAS_credentials.txt,uid=0,gid=0,file_mode=0660,dir_mode=0770,vers=1.0 
+  with_items:
+    - Docker
+    - Code
+...

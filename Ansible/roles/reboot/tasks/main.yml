@@ -1,0 +1,21 @@
+---
+- name: Reboot {{ host }}
+  shell: sleep 10 && /sbin/shutdown -r now
+  async: 300
+  poll: 0
+
+- pause: seconds=30
+
+- name: Wait for {{ host }} to boot
+  delegate_to: centos1
+  shell: ansible -m ping {{ inventory_hostname }}
+  register: result
+  until: result.rc == 0
+  retries: 30
+  delay: 10
+
+- pause: seconds=30
+
+- name: Check uptime
+  shell: uptime
+...

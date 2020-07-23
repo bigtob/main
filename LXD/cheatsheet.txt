@@ -1,0 +1,43 @@
+ll /var/lib/lxd
+ll /var/snap/lxd
+ll /var/snap/lxd/14804
+ls -lrt /var/snap/lxd
+ls -lrt /var/snap/lxd/14804
+ls -lrt /var/snap/lxd/common
+ls -lrt /var/snap/lxd/common/lxd
+ls -lrt /var/snap/lxd/common/lxd/database
+lxc cluster list
+lxc config
+lxc config --help
+lxc config set core.trust_password=yasmine
+lxc config set --help
+lxc config show | grep https
+lxc --help
+lxc info
+lxc network list
+lxc storage
+lxc storage list
+lxd
+lxd cluster --help
+lxd cluster list-database
+lxd help
+lxd init
+
+apt info lxd
+apt list lxd
+apt list lxd*
+apy list lxd*
+ls -lrt /var/snap/lxd
+ls -lrt /var/snap/lxd/common
+ls -lrt /var/snap/lxd/common/lxd/database
+lxc cluster list
+lxc config show | grep https
+lxc config unset cluster.https_address
+lxc config unset core.https_address
+lxd activateifneeded
+lxd cluster list-database
+lxd --help
+lxd init
+lxd shutdown
+lxd stop
+lxd --version

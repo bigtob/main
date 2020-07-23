@@ -1,0 +1,85 @@
+# Run a container from an image, give it a name and map it to port 9000
+docker run -itd -p 9000:9000 --name portainer docker.io/portainer/portainer
+
+# docker swarm
+docker swarm init --advertise-addr 192.168.1.104
+docker swarm join-token [worker|manager] 
+docker node ls
+
+docker service create --mode global
+docker service scale nginx=5
+docker service create --mode=global --name node-exporter --limit-memory=512m prom/node-exporter:latest
+
+docker stack deploy --compose-file=portainer-agent-stack.yml portainer
+docker stack deploy -c rundeck-compose.yml rundeck
+
+docker run -itd --name jenkins -p 8080:8080 -p 50000:50000 -v /var/jenkins_home jenkins/jenkins:lts
+
+Rundeck project
+===============
+
+glusterFS
+---------
+# Added new .vdi disk to each of centos1/2/3
+
+# Show new disk
+fdisk -l 
+
+# Create a partition on new disk (if required)
+parted 
+select /dev/sdb
+mklabel gpt (or MSDOS)
+mkpart primary 0 8590MB
+print
+pvcreate /dev/sdb[1] # create physical volume
+mkfs.xfs -i size=512 /dev/sdb1
+mkdir -p /data/brick1
+echo '/dev/sdb1 /data/brick1 xfs defaults 1 2' >> /etc/fstab
+mount -a && mount
+
+# Install glusterFS
+yum search centos-release-gluster
+yum install centos-release-gluster41.noarch (all three nodes)
+yum install glusterfs-server (all three nodes)
+
+systemctl start glusterd
+systemctl enable glusterd
+
+gluster peer probe centos2; gluster peer probe centos3
+gluster pool list
+gluster peer detach DESKTOP-IM8V9AS
+gluster peer probe centos1
+
+gluster volume create dockervolumes replica 3 transport tcp centos1:/data/brick1/dockervolumes centos2:/data/brick1/dockervolumes centos3:/data/brick1/dockervolumes
+gluster volume start dockervolumes
+gluster volume info
+
+mkdir /dockervolumes
+mount -t glusterfs localhost:/dockervolumes /dockervolumes 
+(here the centos machines are acting as server and client)
+echo "localhost:/dockervolumes /dockervolumes glusterfs defaults,_netdev,backupvolfile-server=localhost 0 0" >> /etc/fstab
+chown -R root:docker /dockervolumes
+
+gitlab
+------
+docker pull gitlab/gitlab-ce
+# /repos/project1/Docker/gitlab
+# docker-compose.yml example in here to create a gitlab/gitlab-runner container in the swarm
+docker stack deploy -c docker-compose.yml gitlab
+root / password
+
+
+# /repos/project1/Docker/rundeck
+# docker-compose.yml is used to build a new rundeck image from Dockerfile as scc/rundeck
+# rundeck-stack-compose.yml is used to build a global service across the swarm using the scc/rundeck image
+
+docker-compose build
+docker-compose up --build # test the image
+docker stack deploy -c rundeck-stack-compose.yml rundeck # deploy the service
+
+# careful when redeploying with modified secrets/configs as they are immutable
+# use docker secret rm / docker config rm to clean up before redeploying 
+
+
+
+TO-DO: Setup gitlab, create project and docker repository. Get all swarm nodes communicating with docker repo.

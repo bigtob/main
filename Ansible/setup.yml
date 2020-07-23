@@ -1,0 +1,8 @@
+# SYNTAX: setup.yml -e "host=<hostname|hostgroup>"
+# PURPOSE: Performs some initial build customisation via call to role
+---
+  - hosts: '{{ host }}'
+    gather_facts: yes
+    roles:
+      - setup
+...
