@@ -64,6 +64,14 @@ connect icingaweb;
 show tables;
 select * from icingaweb_user ;
 
+select Host, User, Password from mysql.user;
+create user 'icinga2'@'192.168.1.209' identified by 'password';
+select Host, User, Password from mysql.user;
+grant all privileges on icinga2.* to 'icinga2'@'192.168.1.209';
+FLUSH PRIVILEGES; # needed after grant to apply privs
+
+edited /etc/my.cnf.d/mariadb-server.cnf and changed 'bind-address = 0.0.0.0' 
+
 # ------------------------------------------
 # Generate a new salt and encrypted password
 # ------------------------------------------
@@ -166,7 +174,6 @@ From centos1
 4. ansible-playbook -i icinga2_hosts playbooks/icinga2-client.yml
 Just the one problem - safe-reload (fails because some scripts don't have valid targets)
 
-
 #################
 # Multi-Zone HA #
 #################
@@ -174,6 +181,19 @@ To set up a second master, create it as an agent and modify the generated config
 create group_vars file for icinga2secondmaster.yml - maybe change to all
 ansible-playbook -i icinga2_hosts playbooks/icinga2-second-master.yml
 
+Issues:
+/etc/ansible/icinga2/playbooks/roles/icinga2_hostconfig/handlers/main.yml
+changed from service to command ("/usr/lib/icinga2/safe-reload")
+
+zones.conf on the masters need "host" attributes for each other - needs fixing in template code
+zones.conf on the satellite needs updating with second master - needs fixing in template code
+enable_ha = true on both servers - needs fixing in template code
+
+https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-available-master-icinga2/
+
+also: firewall-cmd --zone=public --permanent --add-port=5665/tcp ; firewall-cmd --reload
+
+missing centos82!
 
 # https://icinga.com/docs/icinga2/latest/doc/14-features/#db-ido-in-cluster-ha-zones
 # ido-mysql feature needs enabling on the second master
