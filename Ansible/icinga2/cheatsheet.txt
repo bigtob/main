@@ -42,11 +42,12 @@ ansible -m ping all
 # -----------------------
 create an inventory file 'icinga_hosts', using yml format and [group_vars|host_vars] directories and .yml files in each with details.
 ansible -m ping all -i icinga2_hosts
-ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml
+# ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml # Not required
 
 # -----------------------
 # Install master playbook
 # -----------------------
+Ensure group_vars file is correct for icinga2master.yml
 ansible-playbook -i icinga2_hosts ./playbooks/icinga2-master.yml
 firewall-cmd --add-service=http --permanent  # added to icinga2_icingaweb2 role
 firewall-cmd --add-service=https --permanent # added to icinga2_icingaweb2 role
@@ -71,6 +72,20 @@ grant all privileges on icinga2.* to 'icinga2'@'192.168.1.209';
 FLUSH PRIVILEGES; # needed after grant to apply privs
 
 edited /etc/my.cnf.d/mariadb-server.cnf and changed 'bind-address = 0.0.0.0' 
+
+Show whether icinga2 is updating the db:
+
+MariaDB [icinga2]>  SELECT status_update_time FROM icinga_programstatus ps
+    -> JOIN icinga_instances i ON ps.instance_id=i.instance_id
+    -> WHERE (UNIX_TIMESTAMP(ps.status_update_time) > UNIX_TIMESTAMP(NOW())-60)
+    -> AND i.instance_name='default';
++---------------------+
+| status_update_time  |
++---------------------+
+| 2020-07-29 13:29:27 |
++---------------------+
+1 row in set (0.001 sec)
+
 
 # ------------------------------------------
 # Generate a new salt and encrypted password
@@ -100,7 +115,6 @@ edited /etc/ansible/icinga2/playbooks/roles/icinga2_client/tasks/main.yml
 # Install client playbook
 # --------------------------
 Must create host_vars file for new client first!
-Issues: icinga2_hosts group configured as icinga2satclient not icinga2client
 ansible-playbook -i icinga2_hosts ./playbooks/icinga2-client.yml
 
 Issues:
@@ -133,7 +147,14 @@ Updating this in here will automatically distribute the updated scripts to all c
 
 Fixed /etc/icinga2/zones.d/global-templates/checks/linux/chronyd.conf
 Added && host.vars.ansible_os_family != "Debian"
+
+Changed /etc/icinga2/zones.d/global-templates/checks/linux/mailq.conf
+and added host.vars.mailq == "true"
+
 /usr/lib/icinga2/safe-reload
+
+
+
 
 # -----------------------
 # icinga2 troubleshooting
@@ -185,15 +206,11 @@ Issues:
 /etc/ansible/icinga2/playbooks/roles/icinga2_hostconfig/handlers/main.yml
 changed from service to command ("/usr/lib/icinga2/safe-reload")
 
-zones.conf on the masters need "host" attributes for each other - needs fixing in template code
-zones.conf on the satellite needs updating with second master - needs fixing in template code
+zones.conf on the masters need "host" attributes for each other - needs fixing in template code - CHECK THIS
+zones.conf on the satellite needs updating with second master - needs fixing in template code - CREATE TEMPLATE
 enable_ha = true on both servers - needs fixing in template code
 
 https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-available-master-icinga2/
-
-also: firewall-cmd --zone=public --permanent --add-port=5665/tcp ; firewall-cmd --reload
-
-missing centos82!
 
 # https://icinga.com/docs/icinga2/latest/doc/14-features/#db-ido-in-cluster-ha-zones
 # ido-mysql feature needs enabling on the second master
@@ -201,3 +218,21 @@ missing centos82!
 # icinga2 feature enable ido-mysql
 # HA mode SHOULD be enabled automatically:
 # https://icinga.com/docs/icinga2/latest/doc/06-distributed-monitoring/#distributed-monitoring-high-availability-db-ido
+
+#################
+# Health Checks #
+#################
+Ansible puts them here: /etc/icinga2/zones.d/global-templates/checks/all
+Created cluster.conf and health.conf in /etc/icinga2/zones.d/master
+Created health.conf in /etc/icinga2/zones.d/satellite
+
+##########################
+# icinga2 web dashboards #
+##########################
+Added this to the playbook
+/etc/icingaweb2/dashboards/icingaadmin/dashboard.ini
+ensure ownership is apache:icingaweb2
+Content:
+[Current Incidents.Service Grid]
+url = "monitoring/list/servicegrid"
+title = "Service Grid"
