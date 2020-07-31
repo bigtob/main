@@ -42,7 +42,7 @@ ansible -m ping all
 # -----------------------
 create an inventory file 'icinga_hosts', using yml format and [group_vars|host_vars] directories and .yml files in each with details.
 ansible -m ping all -i icinga2_hosts
-# ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml # Not required
+ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml # required?
 
 # -----------------------
 # Install master playbook
