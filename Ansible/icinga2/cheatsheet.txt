@@ -40,7 +40,7 @@ ansible -m ping all
 # -----------------------
 # Prepare master playbook
 # -----------------------
-create an inventory file 'icinga_hosts', using yml format and [group_vars|host_vars] directories and .yml files in each with details.
+Created an inventory file 'icinga_hosts', using ini format and [group_vars|host_vars] directories and .yml files in each with details.
 ansible -m ping all -i icinga2_hosts
 ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml # required?
 
@@ -225,6 +225,20 @@ https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-av
 Ansible puts them here: /etc/icinga2/zones.d/global-templates/checks/all
 Created cluster.conf and health.conf in /etc/icinga2/zones.d/master
 Created health.conf in /etc/icinga2/zones.d/satellite
+New ones in centos1:/etc/ansible/icinga2/config_files
+
+#################
+# Custom Checks #
+#################
+https://exchange.icinga.com/
+Custom checks can be added in master:/usr/lib64/nagios/plugins (shell/python etc.)
+Also add the script to the clients in /usr/lib[64]/nagios/plugins # Not 64 on Ubuntu
+Then create a configuration file in /etc/icinga2/zones.d/global-templates/checks/linux e.g. service.conf
+Now create a CheckCommand object in commands.conf (in global-templates (or conf.d?))
+See example files: 
+centos81:/usr/lib64/nagios/plugins/check_[service|selinux]
+centos81:/etc/icinga2/zones.d/global-templates/commands.conf
+centos81:/etc/icinga2/zones.d/global-templates/checks/linux/[selinux|firewall].conf
 
 ##########################
 # icinga2 web dashboards #
@@ -236,3 +250,63 @@ Content:
 [Current Incidents.Service Grid]
 url = "monitoring/list/servicegrid"
 title = "Service Grid"
+
+######################
+# Jira notifications #
+######################
+https://icinga.com/docs/jira/latest/
+https://icinga.com/docs/jira/latest/doc/03-Configuration/
+yum install -y wget
+
+Install:
+ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
+REPO_URL="https://github.com/Icinga/icingaweb2-module-jira"
+TARGET_DIR="${ICINGAWEB_MODULEPATH}/jira"
+MODULE_VERSION="1.0.0"
+URL="${REPO_URL}/archive/v${MODULE_VERSION}.tar.gz"
+install -d -m 0755 "${TARGET_DIR}"
+wget -q -O - "$URL" | tar xfz - -C "${TARGET_DIR}" --strip-components 1
+
+Enable:
+icingacli module enable jira
+
+Configure:
+install -d -m 2770 -o apache -g icingaweb2 /etc/icingaweb2/modules/jira
+vi /etc/icingaweb2/modules/jira/config.ini
+...
+
+############
+# Graphite #
+############
+Perform steps in graphite cheatsheet
+Modify master:/etc/icinga2/features-available/graphite.conf with server details
+icinga2 feature enable graphite
+systemctl restart icinga2
+
+#################
+# Remove client #
+#################
+cd /etc/ansible/icinga2
+ansible-playbook playbooks/icinga2-remove-client.yml -i icinga2_hosts -e "client=client3"
+
+##############
+# Map module #
+##############
+ICINGAWEB_MODULEPATH="/usr/share/icingaweb2/modules"
+REPO_URL="https://github.com/nbuchwitz/icingaweb2-module-map"
+TARGET_DIR="${ICINGAWEB_MODULEPATH}/map"
+MODULE_VERSION="1.1.0"
+URL="${REPO_URL}/archive/v${MODULE_VERSION}.tar.gz"
+install -d -m 0755 "${TARGET_DIR}"
+wget -q -O - "$URL" | tar xfz - -C "${TARGET_DIR}" --strip-components 1
+
+Enable:
+icingacli module enable map
+
+errors with CharSet in the db: https://community.icinga.com/t/workaround-database-character-set-broken/2354
+vi /etc/icingaweb2/resources.ini
+charset = "latin1" in [icinga_ido] stanza
+
+To add hosts to the map, add the variable vars.geolocation = "<latitude,longtitude>" to a host object
+Southbourne: vars.geolocation = "50.8509047,-0.9150602"
+Hedge End: vars.geolocation = "50.9220319,-1.3101452"
