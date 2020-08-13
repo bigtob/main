@@ -1,0 +1,8 @@
+###########
+# SELinux #
+###########
+
+# check policy issues for today
+ausearch -m AVC,USER_AVC -ts today
+
+journalctl -t setroubleshoot --since=15:45

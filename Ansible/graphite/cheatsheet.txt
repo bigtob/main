@@ -465,7 +465,7 @@ systemctl daemon-reload
 systemctl enable grafana-server
 systemctl start grafana-server
 
-http://192.168.1.214:3000/login
+http://192.168.1.215:3000/login
 admin / admin (changed to password)
 
 Add data source -> Graphite
