@@ -33,26 +33,26 @@ ansible -m ping all
 # https://git.coop/webarch/icinga-network
 # https://git.coop/webarch/icinga
 # https://git.coop/webarch/icingaweb
-
 # cd /root/.ansible/collections/ansible_collections/fiaasco/icinga2
 # ansible-galaxy install -r requirements.yml # this will install the [mariadb|php7|apache] roles from "fiaasco" (though these only seem to be used on Debian installations)
 
 # -----------------------
 # Prepare master playbook
 # -----------------------
+This creates a LAMP stack. Probably not required when done for real. 
 Created an inventory file 'icinga_hosts', using ini format and [group_vars|host_vars] directories and .yml files in each with details.
+group_vars/icinga2master.yml contains details for the db and enable_ha etc.
 ansible -m ping all -i icinga2_hosts
-ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml # required?
+ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml
+ansible-playbook playbooks/prepare-master.yml -i icinga2_hosts2
 
 # -----------------------
 # Install master playbook
 # -----------------------
-Ensure group_vars file is correct for icinga2master.yml
+# This also installs icingaweb2
+# Ensure group_vars file is correct for icinga2master.yml including master/satellite host names and db details and enable_ha etc.
+# If the DB is remote, a suitable user will need to be used! (ie not localhost)
 ansible-playbook -i icinga2_hosts ./playbooks/icinga2-master.yml
-firewall-cmd --add-service=http --permanent  # added to icinga2_icingaweb2 role
-firewall-cmd --add-service=https --permanent # added to icinga2_icingaweb2 role
-firewall-cmd --reload                        # added to icinga2_icingaweb2 role
-firewall-cmd --list-services
 
 Now browse to http://192.168.1.203/icingaweb2/authentication/login (icingaadmin/password)
 
@@ -154,8 +154,6 @@ and added host.vars.mailq == "true"
 /usr/lib/icinga2/safe-reload
 
 
-
-
 # -----------------------
 # icinga2 troubleshooting
 # -----------------------
@@ -170,6 +168,7 @@ client4 = ubuntu20
 icinga2 daemon -C # performs configuration checks
 icinga2 object list --type host --name client1
 icinga2 object list --type endpoint
+icinga2 object list --type zone --name master
 icinga2 ca list --all # list pending signing requests
 icinga2 ca sign [[fingerprint]] # sign the request
 icinga2 node wizard # manually sort the connection
@@ -183,23 +182,22 @@ client1 # icinga2 daemon -C
 firewall-cmd --zone=public --permanent --add-port=5665/tcp
 firewall-cmd --zone=public --permanent --list-ports
 
-################
-# FINAL HOW-TO #
-################
-
-Satellite clients
-From centos1
-1. Create host_vars file in /etc/ansible/icinga2/host_vars setting zone: satellite # investigate all.yml or change default zone?
-2. cd /etc/ansible/icinga2
-3. edit inventory (icinga2_hosts) as required
-4. ansible-playbook -i icinga2_hosts playbooks/icinga2-client.yml
-Just the one problem - safe-reload (fails because some scripts don't have valid targets)
+#####################
+# Satellite clients #
+#####################
+# From centos1
+# Create host_vars file in /etc/ansible/icinga2/host_vars setting zone: satellite # investigate all.yml or change default zone?
+# cd /etc/ansible/icinga2
+# edit inventory (icinga2_hosts) as required
+ansible-playbook -i icinga2_hosts playbooks/icinga2-client.yml
+# Just the one problem - safe-reload (fails because some scripts don't have valid targets)
 
 #################
-# Multi-Zone HA #
+# Second master #
 #################
-To set up a second master, create it as an agent and modify the generated configuration...
-create group_vars file for icinga2secondmaster.yml - maybe change to all
+# To set up a second master, create it as an agent and modify the generated configuration...
+# Edit hosts file and entries for icinga2master (second) and icinga2secondmaster
+# Create group_vars file for icinga2secondmaster.yml
 ansible-playbook -i icinga2_hosts playbooks/icinga2-second-master.yml
 
 Issues:

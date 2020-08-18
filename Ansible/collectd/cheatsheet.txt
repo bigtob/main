@@ -41,11 +41,11 @@ SElinux: setsebool -P collectd_tcp_network_connect 1 - DONE
 global config needs to be in /etc/collectd.conf - DONE
 lib64 dir for centos + collectd-disk install - DONE
 load plugin issue on centos - DONE
+aggregation plugin: Using string value `True' for boolean option `CalculateAverage' is deprecated - DONE
+no disk data for ubuntu1804/client4 - DONE
 
-aggregation plugin: Using string value `True' for boolean option `CalculateAverage' is deprecated and will be removed in future releases. Use unquoted true or false instead.
+sizing considerations
 
 utils_taskstats: mnl_socket_open(NETLINK_GENERIC) = Permission denied see: https://bugzilla.redhat.com/show_bug.cgi?id=1767184
-
-no disk data for ubuntu1804/client4
 
 test the plugin configuration: collectd -T [-C /etc/collectd.conf]

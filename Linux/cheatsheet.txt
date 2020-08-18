@@ -1,8 +1,15 @@
-###########
-# SELinux #
-###########
+### SELinux
 
 # check policy issues for today
 ausearch -m AVC,USER_AVC -ts today
 
 journalctl -t setroubleshoot --since=15:45
+
+### ufw
+ufw status
+
+### firewalld
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+firewall-cmd --reload
+firewall-cmd --list-services
