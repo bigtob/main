@@ -12,8 +12,8 @@ adduser --gecos "User for Ansible automation" ansible # password is ansible
 
 # Setup ssh access from root@centos1 to [root|ansible]@ubuntu1
 ssh-copy-id -i /root/.ssh/id_rsa.pub ansible@ubuntu1
-sed -i '/^\#PermitRootLogin.*/a PermitRootLogin yes' /etc/ssh/sshd_config
-systemctl restart sshd
+sudo sed -i '/^\#PermitRootLogin.*/a PermitRootLogin yes' /etc/ssh/sshd_config 
+sudo systemctl restart sshd
 ssh-copy-id -i /root/.ssh/id_rsa.pub client2
 ssh ansible@ubuntu1 date
 ssh ubuntu1 date
@@ -46,9 +46,9 @@ ansible -m ping all -i icinga2_hosts
 ansible-playbook -i icinga2_hosts ./playbooks/prepare-master.yml
 ansible-playbook playbooks/prepare-master.yml -i icinga2_hosts2
 
-# -----------------------
-# Install master playbook
-# -----------------------
+################
+# First master #
+################
 # This also installs icingaweb2
 # Ensure group_vars file is correct for icinga2master.yml including master/satellite host names and db details and enable_ha etc.
 # If the DB is remote, a suitable user will need to be used! (ie not localhost)
@@ -56,9 +56,49 @@ ansible-playbook -i icinga2_hosts ./playbooks/icinga2-master.yml
 
 Now browse to http://192.168.1.203/icingaweb2/authentication/login (icingaadmin/password)
 
-# ----------------
-# MariaDB commands
-# ----------------
+#################
+# Second master #
+#################
+# To set up a second master, create it as an agent and modify the generated configuration...
+# Edit hosts file and host entry under group icinga2secondmaster
+# Edit group_vars file icinga2secondmaster.yml with correct details
+ansible-playbook -i icinga2_hosts playbooks/icinga2-second-master.yml
+
+Issues:
+/etc/ansible/icinga2/playbooks/roles/icinga2_hostconfig/handlers/main.yml
+changed from service to command ("/usr/lib/icinga2/safe-reload")
+
+zones.conf on the masters need "host" attributes for each other - needs fixing in template code - CHECK THIS
+zones.conf on the satellite needs updating with second master - needs fixing in template code - CREATE TEMPLATE
+enable_ha = true on both servers - needs fixing in template code
+
+https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-available-master-icinga2/
+
+# https://icinga.com/docs/icinga2/latest/doc/14-features/#db-ido-in-cluster-ha-zones
+# ido-mysql feature needs enabling on the second master
+# ll /etc/icinga2/features-available/ido-mysql.conf
+# icinga2 feature enable ido-mysql
+# HA mode SHOULD be enabled automatically:
+# https://icinga.com/docs/icinga2/latest/doc/06-distributed-monitoring/#distributed-monitoring-high-availability-db-ido
+
+#####################
+# Install satellite #
+#####################
+Code copied to /etc/ansible/icinga and tidied up a little
+Moved roles dir into playbooks dir
+centos82 added to icinga2_hosts as satellite server
+cd /etc/ansible/icinga2
+ansible-playbook -i icinga2_hosts ./playbooks/icinga2-satellite.yml
+
+Issues: 
+1) ansible_fqdn fact HAS to match hostname -f command, and be the same in the inventory ?? Check this
+edited /etc/ansible/icinga2/playbooks/roles/icinga2_client/tasks/main.yml 
+
+2) delegated icinga2 restart on centos81 sometimes fails - normally works with /usr/lib/icinga2/safe-reload
+
+##########################
+# MariaDB/MySQL commands #
+##########################
 mysql
 show databases;
 connect icingaweb;
@@ -71,7 +111,7 @@ select Host, User, Password from mysql.user;
 grant all privileges on icinga2.* to 'icinga2'@'192.168.1.209';
 FLUSH PRIVILEGES; # needed after grant to apply privs
 
-edited /etc/my.cnf.d/mariadb-server.cnf and changed 'bind-address = 0.0.0.0' 
+edited /etc/my.cnf.d/mariadb-server.cnf (or /etc/mysql/mysql.conf.d/mysqld.cnf) and changed 'bind-address = 0.0.0.0' 
 
 Show whether icinga2 is updating the db:
 
@@ -86,30 +126,14 @@ MariaDB [icinga2]>  SELECT status_update_time FROM icinga_programstatus ps
 +---------------------+
 1 row in set (0.001 sec)
 
-
-# ------------------------------------------
-# Generate a new salt and encrypted password
-# ------------------------------------------
+##############################################
+# Generate a new salt and encrypted password #
+##############################################
 salt=$(openssl rand -base64 6)
 openssl passwd -1 -salt $salt password
 $1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0
 UPDATE icingaweb_user SET password_hash='$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0' WHERE name = 'icingaadmin';
 mysql -u icingaweb --password=password
-
-# --------------------------
-# Install satellite playbook
-# --------------------------
-Code copied to /etc/ansible/icinga and tidied up a little
-Moved roles dir into playbooks dir
-centos82 added to icinga2_hosts as satellite server
-cd /etc/ansible/icinga2
-ansible-playbook -i icinga2_hosts ./playbooks/icinga2-satellite.yml
-
-Issues: 
-1) ansible_fqdn fact HAS to match hostname -f command, and be the same in the inventory ?? Check this
-edited /etc/ansible/icinga2/playbooks/roles/icinga2_client/tasks/main.yml 
-
-2) delegated icinga2 restart on centos81 sometimes fails - normally works with /usr/lib/icinga2/safe-reload
 
 # --------------------------
 # Install client playbook
@@ -154,9 +178,9 @@ and added host.vars.mailq == "true"
 /usr/lib/icinga2/safe-reload
 
 
-# -----------------------
-# icinga2 troubleshooting
-# -----------------------
+###########################
+# icinga2 troubleshooting #
+###########################
 centos1 = ansible control host
 centos81 = master
 centos82 = satellite
@@ -193,31 +217,6 @@ ansible-playbook -i icinga2_hosts playbooks/icinga2-client.yml
 # Just the one problem - safe-reload (fails because some scripts don't have valid targets)
 
 #################
-# Second master #
-#################
-# To set up a second master, create it as an agent and modify the generated configuration...
-# Edit hosts file and entries for icinga2master (second) and icinga2secondmaster
-# Create group_vars file for icinga2secondmaster.yml
-ansible-playbook -i icinga2_hosts playbooks/icinga2-second-master.yml
-
-Issues:
-/etc/ansible/icinga2/playbooks/roles/icinga2_hostconfig/handlers/main.yml
-changed from service to command ("/usr/lib/icinga2/safe-reload")
-
-zones.conf on the masters need "host" attributes for each other - needs fixing in template code - CHECK THIS
-zones.conf on the satellite needs updating with second master - needs fixing in template code - CREATE TEMPLATE
-enable_ha = true on both servers - needs fixing in template code
-
-https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-available-master-icinga2/
-
-# https://icinga.com/docs/icinga2/latest/doc/14-features/#db-ido-in-cluster-ha-zones
-# ido-mysql feature needs enabling on the second master
-# ll /etc/icinga2/features-available/ido-mysql.conf
-# icinga2 feature enable ido-mysql
-# HA mode SHOULD be enabled automatically:
-# https://icinga.com/docs/icinga2/latest/doc/06-distributed-monitoring/#distributed-monitoring-high-availability-db-ido
-
-#################
 # Health Checks #
 #################
 Ansible puts them here: /etc/icinga2/zones.d/global-templates/checks/all
@@ -228,6 +227,7 @@ New ones in centos1:/etc/ansible/icinga2/config_files
 #################
 # Custom Checks #
 #################
+Template library reference is here: https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/
 https://exchange.icinga.com/
 Custom checks can be added in master:/usr/lib64/nagios/plugins (shell/python etc.)
 Also add the script to the clients in /usr/lib[64]/nagios/plugins # Not 64 on Ubuntu
