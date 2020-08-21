@@ -84,17 +84,46 @@ https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-av
 #####################
 # Install satellite #
 #####################
-Code copied to /etc/ansible/icinga and tidied up a little
-Moved roles dir into playbooks dir
-centos82 added to icinga2_hosts as satellite server
+# Create groups_vars file for each satellite zone: icinga2satellite[fab|hav].yml
+# Ensure icinga_is_satellite is specified as true and icinga_zone is set to satellite-[fab|hav]
+# icinga2_hosts file:
+#[icinga2satellitehav]
+#satellite1
+#satellite2
+#
+#[icinga2satellitefab]
+#satellite3
+#satellite4
+#
+# The playbook runs for hosts: icinga2satellitehav:icinga2satellitefab
 cd /etc/ansible/icinga2
-ansible-playbook -i icinga2_hosts ./playbooks/icinga2-satellite.yml
+ansible-playbook -i icinga2_hosts2 ./playbooks/icinga2-satellite.yml
 
 Issues: 
 1) ansible_fqdn fact HAS to match hostname -f command, and be the same in the inventory ?? Check this
 edited /etc/ansible/icinga2/playbooks/roles/icinga2_client/tasks/main.yml 
 
 2) delegated icinga2 restart on centos81 sometimes fails - normally works with /usr/lib/icinga2/safe-reload
+
+##################
+# Install client #
+##################
+# Create a host_vars file for new client with site: specified (or pass as extra variable)
+ansible-playbook -i icinga2_hosts ./playbooks/icinga2-client.yml
+
+Issues:
+RUNNING HANDLER [icinga2_hostconfig : reload master icinga2] *************************************
+failed: [ubuntu1 -> centos81] (item=centos81) => {"ansible_loop_var": "item", "changed": false, "item": 
+"centos81", "msg": "Unable to reload service icinga2: Job for icinga2.service failed.\nSee \"systemctl status icinga2.service\" and \"journalctl -xe\" for details.\n"}
+Caused in line 27 of /usr/lib/icinga2/safe-reload
+Jul 23 12:05:40 centos81 safe-reload[7318]: Validating config files: /usr/lib/icinga2/safe-reload: line 27: /tmp/tmp.Wnu
+It fails because of this: 
+/usr/sbin/icinga2 daemon --validate --color has warnings in it. There are rules files which don't match anywhere.
+I have 'fixed' this by adding a '-x critical' to the command above in /usr/lib/icinga2/safe-reload
+
+# Client reprovision from scratch
+ansible-playbook -i icinga2_hosts2 ./playbooks/icinga2-client.yml -e "icinga_client_reprovision='true'"
+fix deprecation warnings for this!
 
 ##########################
 # MariaDB/MySQL commands #
@@ -135,25 +164,9 @@ $1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0
 UPDATE icingaweb_user SET password_hash='$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0' WHERE name = 'icingaadmin';
 mysql -u icingaweb --password=password
 
-# --------------------------
-# Install client playbook
-# --------------------------
-Must create host_vars file for new client first!
-ansible-playbook -i icinga2_hosts ./playbooks/icinga2-client.yml
-
-Issues:
-RUNNING HANDLER [icinga2_hostconfig : reload master icinga2] *************************************
-failed: [ubuntu1 -> centos81] (item=centos81) => {"ansible_loop_var": "item", "changed": false, "item": 
-"centos81", "msg": "Unable to reload service icinga2: Job for icinga2.service failed.\nSee \"systemctl status icinga2.service\" and \"journalctl -xe\" for details.\n"}
-Caused in line 27 of /usr/lib/icinga2/safe-reload
-Jul 23 12:05:40 centos81 safe-reload[7318]: Validating config files: /usr/lib/icinga2/safe-reload: line 27: /tmp/tmp.Wnu
-It fails because of this: 
-/usr/sbin/icinga2 daemon --validate --color has warnings in it. There are rules files which don't match anywhere.
-I have 'fixed' this by adding a '-x critical' to the command above in /usr/lib/icinga2/safe-reload
-
-# -----
-# Zones
-# -----
+#########
+# Zones #
+#########
 /etc/icinga2/zones.conf is a key file!
 see examples on centos81/2/client1
 
@@ -161,9 +174,9 @@ Zones are defined in /etc/icinga2/zones.d/{zonename} on the master
 There should be a .conf file for each node in the relevant zonename directory
 In the {node}.conf file there should be Host/Endpoint/Zone definitions
 
-# ------------------------------
-# Templates (checks/scripts etc)
-# ------------------------------
+##################################
+# Templates (checks/scripts etc) #
+##################################
 /etc/icinga2/zones.d/global-templates/
 e.g. /etc/icinga2/zones.d/global-templates/checks/linux/time.conf
 changed vars.ntp_address = "2.centos.pool.ntp.org"
@@ -177,18 +190,9 @@ and added host.vars.mailq == "true"
 
 /usr/lib/icinga2/safe-reload
 
-
 ###########################
 # icinga2 troubleshooting #
 ###########################
-centos1 = ansible control host
-centos81 = master
-centos82 = satellite
-client1 = centos8
-client2 = centos8
-client3 = centos7
-client4 = ubuntu20
-
 icinga2 daemon -C # performs configuration checks
 icinga2 object list --type host --name client1
 icinga2 object list --type endpoint

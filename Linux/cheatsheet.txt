@@ -7,9 +7,26 @@ journalctl -t setroubleshoot --since=15:45
 
 ### ufw
 ufw status
+ufw allow 5665/tcp && ufw reload 
 
 ### firewalld
+firewall-cmd --list-all # services and ports
 firewall-cmd --add-service=http --permanent
 firewall-cmd --add-service=https --permanent
 firewall-cmd --reload
 firewall-cmd --list-services
+
+### apt
+apt install icinga2 (-y)
+apt list --installed icinga2
+apt list --installed icinga2 -a # shows installed and available
+apt remove icinga2
+apt autoremove icinga2 # remove icinga pkg and automatically installed pkgs (deps)
+apt update # update repo cache
+
+dpkg --configure -a # show dependency problems
+apt-get -f install
+apt install icinga2 --reinstall
+
+### ss
+ss -ln4 # show listening ipv4
