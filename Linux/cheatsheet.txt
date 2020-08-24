@@ -2,8 +2,15 @@
 
 # check policy issues for today
 ausearch -m AVC,USER_AVC -ts today
-
 journalctl -t setroubleshoot --since=15:45
+
+chcon -t nagios_unconfined_plugin_exec_t check_selinux
+
+# ubuntu install/configure
+apt install policycoreutils selinux-basics selinux-utils
+selinux-activate
+selinux-config-enforcing # creates /etc/selinux/config
+reboot
 
 ### ufw
 ufw status

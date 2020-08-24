@@ -1,0 +1,67 @@
+##################################
+# Templates (checks/scripts etc) #
+##################################
+Location: /etc/icinga2/zones.d/global-templates/
+Updating scripts in here will automatically distribute the updated scripts to all clients (after /usr/lib/icinga2/safe-reload)
+
+### chronyd
+Fixed /etc/icinga2/zones.d/global-templates/checks/linux/chronyd.conf
+Added && host.vars.ansible_os_family != "Debian"
+
+### ping
+Fixed /etc/icinga2/zones.d/global-templates/checks/all/ping.conf
+Commented out "ignore where host.vars.is_satellite"
+
+### mailq
+Changed /etc/icinga2/zones.d/global-templates/checks/linux/mailq.conf
+and added && host.vars.mailq == "true"
+
+### SELinux
+Created new plugin centos1:/etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks
+Ansible copies selinux.conf from /etc/ansible/icinga2/playbooks/roles/icinga2_checks/templates/checks/linux 
+to /etc/icinga2/zones.d/global-templates/checks/linux via /etc/ansible/icinga2/playbooks/roles/icinga2_checks/tasks/main.yml
+CheckCommand object added to /etc/ansible/icinga2/playbooks/roles/icinga2_master/templates/global-templates/commands.conf
+
+### firewall
+Created new plugin centos1:/etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks/check_firewall
+Ansible copies firewall.conf from /etc/ansible/icinga2/playbooks/roles/icinga2_checks/templates/checks/linux 
+to /etc/icinga2/zones.d/global-templates/checks/linux via /etc/ansible/icinga2/playbooks/roles/icinga2_checks/tasks/main.yml
+CheckCommand object added to /etc/ansible/icinga2/playbooks/roles/icinga2_master/templates/global-templates/commands.conf
+
+### TO-DO
+Proper check_time for (time.conf) chronyd and timesyncd
+Need to fix /etc/icinga2/zones.d/global-templates/checks/linux/time.conf
+change vars.ntp_address = "2.centos.pool.ntp.org" to temporarily fix
+
+#################
+# Custom Checks #
+#################
+Template library reference is here: https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/
+https://exchange.icinga.com/
+Custom checks can be added in master:/usr/lib[64]/nagios/plugins (shell/python/perl/C etc.)
+Also add the script to the clients in /usr/lib[64]/nagios/plugins # Not 64 on Ubuntu
+Then create a configuration file in /etc/icinga2/zones.d/global-templates/checks/linux e.g. service.conf
+Now create a CheckCommand object in commands.conf (in global-templates (or conf.d?))
+See example files: 
+centos81|testmaster:/usr/lib64/nagios/plugins/check_[service|selinux]
+centos81|testmaster:/etc/icinga2/zones.d/global-templates/commands.conf
+centos81|testmaster:/etc/icinga2/zones.d/global-templates/checks/linux/[selinux|firewall].conf
+Don't forget SELinux contexts, if appropriate.
+
+# Ansible
+Custom check files are located here: /etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks/
+These should be installed by the monitoring_plugins role via /etc/ansible/icinga2/playbooks/roles/monitoring_plugins/tasks/main.yml
+
+To install/distribute the nagios plugins and custom checks:
+ansible-playbook -i ../icinga2_hosts2 icinga2-plugins.yml -e "host=client2"
+
+How do we manage the master (.conf and CheckCommand) config?
+
+#################
+# Health Checks #
+#################
+Ansible puts them here: /etc/icinga2/zones.d/global-templates/checks/all
+# Ansible ones work fine but I also tested others:
+# Created cluster.conf and health.conf in /etc/icinga2/zones.d/master
+# Created health.conf in /etc/icinga2/zones.d/satellite
+# New ones in centos1:/etc/ansible/icinga2/config_files

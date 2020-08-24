@@ -174,22 +174,6 @@ Zones are defined in /etc/icinga2/zones.d/{zonename} on the master
 There should be a .conf file for each node in the relevant zonename directory
 In the {node}.conf file there should be Host/Endpoint/Zone definitions
 
-##################################
-# Templates (checks/scripts etc) #
-##################################
-/etc/icinga2/zones.d/global-templates/
-e.g. /etc/icinga2/zones.d/global-templates/checks/linux/time.conf
-changed vars.ntp_address = "2.centos.pool.ntp.org"
-Updating this in here will automatically distribute the updated scripts to all clients
-
-Fixed /etc/icinga2/zones.d/global-templates/checks/linux/chronyd.conf
-Added && host.vars.ansible_os_family != "Debian"
-
-Changed /etc/icinga2/zones.d/global-templates/checks/linux/mailq.conf
-and added host.vars.mailq == "true"
-
-/usr/lib/icinga2/safe-reload
-
 ###########################
 # icinga2 troubleshooting #
 ###########################
@@ -219,28 +203,6 @@ firewall-cmd --zone=public --permanent --list-ports
 # edit inventory (icinga2_hosts) as required
 ansible-playbook -i icinga2_hosts playbooks/icinga2-client.yml
 # Just the one problem - safe-reload (fails because some scripts don't have valid targets)
-
-#################
-# Health Checks #
-#################
-Ansible puts them here: /etc/icinga2/zones.d/global-templates/checks/all
-Created cluster.conf and health.conf in /etc/icinga2/zones.d/master
-Created health.conf in /etc/icinga2/zones.d/satellite
-New ones in centos1:/etc/ansible/icinga2/config_files
-
-#################
-# Custom Checks #
-#################
-Template library reference is here: https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/
-https://exchange.icinga.com/
-Custom checks can be added in master:/usr/lib64/nagios/plugins (shell/python etc.)
-Also add the script to the clients in /usr/lib[64]/nagios/plugins # Not 64 on Ubuntu
-Then create a configuration file in /etc/icinga2/zones.d/global-templates/checks/linux e.g. service.conf
-Now create a CheckCommand object in commands.conf (in global-templates (or conf.d?))
-See example files: 
-centos81:/usr/lib64/nagios/plugins/check_[service|selinux]
-centos81:/etc/icinga2/zones.d/global-templates/commands.conf
-centos81:/etc/icinga2/zones.d/global-templates/checks/linux/[selinux|firewall].conf
 
 ##########################
 # icinga2 web dashboards #
