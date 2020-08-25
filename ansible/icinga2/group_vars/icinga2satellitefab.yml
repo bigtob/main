@@ -1,0 +1,4 @@
+---
+icinga_is_satellite: true
+icinga_zone: satellite-fab
+icinga2_ticketsalt: password

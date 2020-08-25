@@ -1,0 +1,31 @@
+/*
+ * Master file location: /etc/ansible/icinga2/config_files
+ */
+
+object Endpoint "{{ satellite1 }}" {
+        host = "{{ satellite1 }}"
+}
+
+object Endpoint "{{ satellite2 }}" {
+        host = "{{ satellite2 }}"
+}
+
+object Zone "satellite" {
+        endpoints = [ "{{ satellite1 }}", "{{ satellite2 }}" ]
+}
+
+object Endpoint "{{ client }}" {
+}
+
+object Zone "{{ client }}" {
+        endpoints = [ "{{ client }}" ]
+        parent = "satellite"
+}
+
+object Zone "global-templates" {
+        global = true
+}
+
+object Zone "director-global" {
+        global = true
+}

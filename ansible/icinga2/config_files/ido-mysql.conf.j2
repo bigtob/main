@@ -1,0 +1,13 @@
+/*
+ * Master file location: /etc/ansible/icinga2/config_files
+ */
+
+library "db_ido_mysql"
+
+object IdoMysqlConnection "ido-mysql" {
+  user = "{{ icinga2_idodb_user }}",
+  password = "{{ icinga2_idodb_pass }}",
+  host = "{{ icinga2_idodb_host }}",
+  database = "{{ icinga2_idodb_name }}",
+  enable_ha = {{ icinga2_idodb_enable_ha }}
+}

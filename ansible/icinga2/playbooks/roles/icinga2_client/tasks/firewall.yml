@@ -1,0 +1,32 @@
+---
+- name: check for service_facts
+  service_facts:
+  register: services
+
+- name: open icinga ports (ufw)
+  ufw:
+    rule: allow
+    port: "{{ icinga2_network_port }}"
+    proto: "{{ icinga2_network_proto }}"
+    src: '{{ item }}'
+  loop:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+  when:
+    - ansible_os_family == "Debian"
+    - services.ansible_facts.services.ufw is defined
+    - services.ansible_facts.services.ufw.state == "running"
+    #- inventory_hostname in groups.dmz|default([])
+
+- name: open icinga ports (firewalld)
+  firewalld:
+    port: "{{ icinga2_network_port }}/{{ icinga2_network_proto }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  when:
+    - ansible_os_family == "RedHat"
+    - services.ansible_facts.services["firewalld.service"] is defined
+    - services.ansible_facts.services["firewalld.service"].state == "running"
+    #- (inventory_hostname in groups.dmz|default([])

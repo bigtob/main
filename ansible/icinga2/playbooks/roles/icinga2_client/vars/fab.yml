@@ -1,0 +1,8 @@
+---
+# vars file for client zone and endpoint setup
+
+icinga_parent:
+  zone: satellite-fab
+  endpoints:
+    - "{{ groups.icinga2satellitefab[0] }}"
+    - "{{ groups.icinga2satellitefab[1] }}"

@@ -1,0 +1,125 @@
+---
+
+# Second master playbook
+# Configure as client first in the master zone
+# Then modify generated configuration
+
+- name: deploy Icinga2 client
+  hosts: icinga2secondmaster
+  become: true
+  roles:
+    - role: monitoring_plugins
+    - role: icinga2_client
+    - role: icinga2_hostconfig
+
+  post_tasks:
+  - name: shutdown icinga2 client
+    systemd: 
+      name: icinga2 
+      state: stopped
+
+  - name: reconfigure local /etc/icinga2/zones.conf
+    template:
+      src: "/etc/ansible/icinga2/config_files/master2_zones.conf.j2"
+      dest: /etc/icinga2/zones.conf
+      owner: "{{ icinga2_user }}" 
+      group: "{{ icinga2_user }}"
+      mode: 0644
+      backup: yes
+      force: yes
+
+  - name: check for service_facts
+    service_facts:
+    register: services
+
+  - name: ufw | open icinga ports
+    ufw:
+      rule: allow
+      port: "{{ icinga2_network_port | default('5665') }}"
+      proto: "{{ icinga2_network_proto | default('tcp') }}"
+    when: >
+      ansible_os_family == "Debian"
+      and services.ansible_facts.services.ufw is defined
+      and services.ansible_facts.services.ufw.state == "running"
+
+  - name: firewalld | open icinga ports
+    firewalld:
+      port: "{{ icinga2_network_port | default('5665') }}/{{ icinga2_network_proto | default('tcp') }}"
+      permanent: true
+      state: enabled
+      immediate: true
+    when: >
+      ansible_os_family == "RedHat"
+      and services.ansible_facts.services["firewalld.service"] is defined
+      and services.ansible_facts.services["firewalld.service"].state == "running"
+
+- hosts: icinga2master
+  become: true
+  vars:
+    #master1: "{{ groups.icinga2master|first }}"
+    #master2: "{{ groups.icinga2secondmaster|first }}"
+    #satellite1: "{{ groups.icinga2satellite[0] }}"
+    #satellite2: "{{ groups.icinga2satellite[1] }}"
+    #satellite3: "{{ groups.icinga2satellite[2] }}"
+    #satellite4: "{{ groups.icinga2satellite[3] }}"
+    #icinga2_user: nagios
+  tasks:
+  - name: copy master zones.conf to master
+    template:
+      src: "/etc/ansible/icinga2/config_files/master1_zones.conf.j2"
+      dest: /etc/icinga2/zones.conf
+      owner: "{{ icinga2_user }}"
+      group: "{{ icinga2_user }}"
+      mode: 0644
+      force: yes
+      backup: yes
+
+  - name: copy new master2.conf to master
+    template:
+      src: "/etc/ansible/icinga2/config_files/master2.conf.j2"
+      dest: /etc/icinga2/zones.d/master/{{ master2 }}.conf
+      owner: "{{ icinga2_user }}"
+      group: "{{ icinga2_user }}"
+      mode: 0644
+      backup: no
+      force: yes
+
+  - name: Check icinga2 configuration
+    command: icinga2 daemon -C
+
+  - name: Reload icinga2
+    systemd: 
+      name: icinga2 
+      state: started
+
+- hosts: icinga2secondmaster
+  become: true
+  vars:
+    master1: "{{ groups.icinga2master|first }}"
+    master2: "{{ groups.icinga2secondmaster|first }}"
+  tasks:
+  - name: Install icinga2-ido-mysql
+    package:
+      name: icinga2-ido-mysql
+      state: present   
+
+  - name: Configure /etc/icinga2/features-available/ido-mysql.conf
+    template:
+      src: "/etc/ansible/icinga2/config_files/ido-mysql.conf.j2"
+      dest: /etc/icinga2/features-available/ido-mysql.conf
+      owner: "{{ icinga2_user }}"
+      group: "{{ icinga2_user }}"
+      mode: 0640
+      force: yes
+
+  - name: Enable ido-mysql feature
+    command: icinga2 feature enable ido-mysql
+
+  - name: Check icinga2 configuration
+    command: icinga2 daemon -C
+
+  - name: Start icinga2 client
+    systemd: 
+      name: icinga2 
+      state: restarted
+...

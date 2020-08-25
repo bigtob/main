@@ -1,0 +1,39 @@
+---
+- hosts: "{{ host }}"
+  become: true
+  gather_facts: false
+  vars:
+    __monitoring_plugins_path: /usr/lib64/nagios/plugins
+  tasks: 
+    - name: build a list of our own custom nagios checks
+      local_action:
+        module: find
+        paths: /etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks
+      register: customnagiosfiles
+      tags: customnagioschecks
+
+    - debug:
+        msg: "{{ customnagiosfiles.files }}"
+
+    - name: copy our own custom nagios checks
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ __monitoring_plugins_path }}"
+        owner: root
+        group: root
+        mode: 0755
+      with_items:
+        - "{{ customnagiosfiles.files }}"
+      tags: customnagioschecks
+
+    - name: set SELinux contexts on custom nagios checks
+      command: chcon -t nagios_unconfined_plugin_exec_t "{{ item.path | basename }}"
+      #sefcontext:
+      #  target: "{{ __monitoring_plugins_path }}/{{ item.path | basename }}"
+      #  setype: nagios_unconfined_plugin_exec_t
+      #  state: present
+      args:
+        chdir: "{{ __monitoring_plugins_path }}"
+      with_items:
+        - "{{ customnagiosfiles.files }}"
+

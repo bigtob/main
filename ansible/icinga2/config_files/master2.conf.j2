@@ -1,0 +1,34 @@
+/*
+ * Master file location: /etc/ansible/icinga2/config_files
+ */
+
+object Host "{{ master2 }}" {
+  /* Import host template defined in `templates.conf`. */
+  import "generic-host"
+
+  vars.client_endpoint = name
+
+  vars.icinga_zone = "master"
+
+  /* Specify the address attributes for checks e.g. `ssh` or `http`. */
+  address = "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}" 
+  /* address6 = "::1" */
+
+
+  /* Set custom attribute `os` for hostgroup assignment in `groups.conf`. */
+  vars.os = "{{ ansible_system }}"
+  vars.ansible_os_family = "{{ ansible_distribution_file_variety }}"
+  vars.ansible_distribution_major_version = "{{ ansible_distribution_major_version }}"
+
+  /* Define disks and attributes for service apply rules in `services.conf`. */
+  vars.disks["disk"] = {
+    /* No parameters. */
+  }
+
+  /* Notify by e-mail to the following groups */
+  vars.notification.mail.groups = []
+
+  /* variables used for http(s) monitoring */
+
+  /* variables used for solr monitoring */
+}

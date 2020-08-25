@@ -1,0 +1,16 @@
+---
+
+- name: Include OS family specific vars
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_distribution_release }}.yml"
+        - "{{ ansible_os_family }}.yml"
+      paths:
+        - "vars"
+
+- name: set vars
+  set_fact:
+    "{{ var }}": "{{ lookup('vars', '__' + var) }}"
+  when: not lookup('vars', var, default=false)

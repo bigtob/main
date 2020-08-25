@@ -1,0 +1,7 @@
+---
+  - hosts: "{{ host }}"
+    tasks:
+      - include_role:
+          name: monitoring_plugins
+          tasks_from: main
+...

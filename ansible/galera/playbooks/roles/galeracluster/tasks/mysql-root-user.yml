@@ -1,0 +1,12 @@
+---
+- name: set root user password
+  mysql_user:
+    host: "{{ item }}"
+    login_user: root
+    login_password:
+    name: root
+    password: "{{ mysql_root_password }}"
+    state: present
+  loop:
+    - 127.0.0.1
+    - localhost

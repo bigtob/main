@@ -1,0 +1,3 @@
+---
+icinga2_ticketsalt: password
+icinga_is_client: true

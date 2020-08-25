@@ -1,0 +1,81 @@
+/*
+ * Master template location: /etc/ansible/icinga2/config_files/master2_zones.conf.j2
+ */
+
+object Endpoint "{{ master2 }}" {
+  // That's us
+}
+
+object Endpoint "{{ master1 }}" {
+  // First master already connects to us
+}
+
+{% if satellite1 %}
+object Endpoint "{{ satellite1 }}" {
+  host = "{{ satellite1 }}" // Actively connect to the first satellite.
+}
+{% endif %}
+
+{% if satellite2 %}
+object Endpoint "{{ satellite2 }}" {
+  host = "{{ satellite2 }}" // Actively connect to the second satellite.
+}
+{% endif %}
+
+{% if satellite3 %}
+object Endpoint "{{ satellite3 }}" {
+  host = "{{ satellite3 }}" // Actively connect to the third satellite.
+}
+{% endif %}
+
+{% if satellite4 %}
+object Endpoint "{{ satellite4 }}" {
+  host = "{{ satellite4 }}" // Actively connect to the fourth satellite.
+}
+{% endif %}
+
+object Zone "master" {
+  endpoints = [ "{{ master1 }}", "{{ master2 }}" ]
+}
+
+{% if satellite1 and satellite2 %}
+object Zone "satellite-hav" {
+  endpoints = [ "{{ satellite1 }}", "{{ satellite2 }}" ]
+  parent = "master"
+}
+{% elif satellite1 and not satellite2 %}
+object Zone "satellite-hav" {
+  endpoints = [ "{{ satellite1 }}" ]
+  parent = "master"
+}
+{% elif satellite2 and not satellite1 %}
+object Zone "satellite-hav" {
+  endpoints = [ "{{ satellite2 }}" ]
+  parent = "master"
+}
+{% endif %}
+
+{% if satellite3 and satellite4 %}
+object Zone "satellite-fab" {
+  endpoints = [ "{{ satellite3 }}", "{{ satellite4 }}" ]
+  parent = "master"
+}
+{% elif satellite3 and not satellite4 %}
+object Zone "satellite-fab" {
+  endpoints = [ "{{ satellite3 }}" ]
+  parent = "master"
+}
+{% elif satellite4 and not satellite3 %}
+object Zone "satellite-fab" {
+  endpoints = [ "{{ satellite4 }}" ]
+  parent = "master"
+}
+{% endif %}
+
+object Zone "global-templates" {
+        global = true
+}
+
+object Zone "director-global" {
+        global = true
+}

@@ -1,0 +1,34 @@
+---
+# description: Icinga parent zone and zone endpoints hostnames.
+#              The default is configured to connect to the master zone.
+#              Override this value with the satellite zone name and endpoints for clients connecting
+#              to a satellite.
+# type: dict
+icinga_parent:
+  zone: master
+  endpoints:
+    - "{{ groups.icinga2master|first }}"
+
+# description: Icinga user groups to send e-mail notifications
+#              should be an array between qoutes (icinga2 syntax)
+# type: string
+# example: '[ "icingaadmins" ]'
+icinga_mail_notification_groups: '[]'
+
+# description: Icinga host variables.
+#              All variables prefixed with "icinga_hv_" will be available in host.vars
+#              (without the prefix).
+# type: any
+# examples:
+#   - icinga_hv_http_port: 8080
+#   - icinga_hv_postgresql_backup_warning: 46800
+#   - icinga_hv_postgresql_backup_critical: 50400
+#   - icinga_hv_mysql_backup_warning: 46800
+#   - icinga_hv_mysql_backup_critical: 50400
+#icinga_hv_<VARNAME>: OMITTED
+
+# description: include all ansible groups in the host config
+#              this may cause issues with missing groups in some situations
+#              (eg when adding a host from a branch)
+# type: bool
+icinga2_hostconfig_ansible_groups: false

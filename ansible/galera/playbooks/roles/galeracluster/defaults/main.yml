@@ -1,0 +1,4 @@
+---
+# description: MariaDB server version
+# type: string
+mariadb_version: 10.5 

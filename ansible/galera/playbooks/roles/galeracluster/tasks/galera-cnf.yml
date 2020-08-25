@@ -1,0 +1,6 @@
+---
+- name: create galera.cnf from template
+  template:
+    src: galera.cnf.j2
+    dest: /etc/mysql/conf.d/galera.cnf
+  notify: stop mysql

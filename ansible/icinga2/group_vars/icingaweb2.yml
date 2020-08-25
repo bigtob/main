@@ -1,0 +1,11 @@
+---
+apache2_adminhost_https: false
+icingaweb_db_pass: password
+icingaweb_password_salt: password
+icingaweb_admin_pass: password
+icingaweb_roles:
+  - name: Testrole
+    groups: Testgroup
+    permissions: "module/grafana, module/monitoring, monitoring/command/schedule-check, monitoring/command/acknowledge-problem, monitoring/command/remove-acknowledgement, monitoring/command/comment/*, monitoring/command/comment/add, monitoring/command/downtime/*, monitoring/command/downtime/schedule, monitoring/command/downtime/delete"
+    filter: "(host_name=*test*|host_name=test*)"
+icinga2_ticketsalt: password

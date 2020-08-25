@@ -1,0 +1,48 @@
+---
+- name: Include dynamic vars
+  include_tasks: load_vars.yml
+  with_items:
+    - "monitoring_plugins_{{ ansible_distribution }}_all"
+    - "monitoring_plugins_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+    - "monitoring_plugins_custom_{{ ansible_distribution }}_{{ ansible_distribution_major_version }}"
+    - "monitoring_plugins_path"
+    - "monitoring_plugins_user"
+  vars:
+    var: "{{ main_item }}"
+  loop_control:
+    loop_var: main_item
+
+- name: install plugins for os family
+  include_tasks: "{{ ansible_os_family }}.yml"
+
+- name: deploy eventhandlers if required
+  include_tasks: eventhandlers.yml
+  when: monitoring_plugins_eventhandlers|bool
+
+- name: build a list of our own custom nagios checks
+  local_action:
+    module: find
+    paths: /etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks
+  register: customnagiosfiles
+
+- name: copy our own custom nagios checks
+  copy:
+    src: "{{ item.path }}"
+    dest: "{{ __monitoring_plugins_path }}"
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - "{{ customnagiosfiles.files }}"
+
+- name: get current SELinux status
+  shell: sestatus | grep ^"SELinux status" | awk '{print $NF}'
+  register: selinuxstatus
+
+- name: set SELinux contexts on custom nagios checks
+  command: chcon -t nagios_unconfined_plugin_exec_t "{{ item.path | basename }}"
+  args:
+    chdir: "{{ __monitoring_plugins_path }}"
+  with_items:
+    - "{{ customnagiosfiles.files }}"
+  when: selinuxstatus.stdout == "enabled"

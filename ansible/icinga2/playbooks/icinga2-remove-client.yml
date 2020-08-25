@@ -1,0 +1,94 @@
+---
+  - hosts: "{{ client }}"
+    become: true
+    gather_facts: true
+    tasks: 
+      - name: stop icinga2 on client
+        systemd: 
+          name: icinga2
+          state: stopped
+          enabled: false
+        ignore_errors: True
+
+      - name: remove icinga2 packages
+        package:
+          name: 
+            - icinga2
+            - icinga-rpm-release
+            - icinga2-selinux.x86_64
+            - icinga2-common
+            - icinga2-bin
+          state: absent
+
+      - name: clean up icinga2 files and directories
+        file: 
+          path: '{{ item }}'
+          state: absent
+        with_items:
+          - /var/log/icinga2
+          - /etc/icinga2
+          - /etc/sudoers.d/icinga
+          - /run/icinga2
+          - /var/lib/icinga2
+          - /var/cache/icinga2
+          - /etc/systemd/system/icinga2.service.d/limits.conf
+          - /usr/lib/systemd/system/icinga2.service
+          - /etc/systemd/system/multi-user.target.wants/icinga2.service
+          - /usr/lib64/icinga2
+          - /usr/share/icinga2
+          - /var/cache/yum/x86_64/7/icinga-stable-release
+          - /var/lib/yum/repos/x86_64/7/icinga-stable-release
+          # Ubuntu
+          - /etc/apt/sources.list.d/packages_icinga_com_ubuntu.list
+
+      - name: clean yum cache
+        command: yum clean all
+        args:
+          warn: false
+        when: ansible_os_family == 'RedHat'
+ 
+      - name: clean apt cache
+        apt: 
+          update_cache: yes
+        when: ansible_os_family == 'Debian'
+
+      - name: remove icinga users
+        user:
+          name: '{{ item }}'
+          state: absent
+          remove: yes
+        with_items:
+          - icinga
+          - nagios
+
+      - name: remove icinga groups
+        group:
+          name: '{{ item }}'
+          state: absent
+        with_items:
+          - icinga
+          - icingacmd
+          - nagios
+
+  - hosts: "{{ groups.icinga2master|first }}"
+    become: true
+    gather_facts: false
+    tasks:
+      - name: find master client.conf file
+        find: 
+          paths: /etc/icinga2/zones.d
+          patterns: "{{ client }}.conf"
+          recurse: yes
+        register: matchedfile
+
+      - name: remove master client.conf file
+        file:
+          path: '{{ matchedfile.files[0].path }}'
+          state: absent
+
+      - name: verify icinga2 configuration
+        command: icinga2 daemon -C
+        
+      - name: reload configuration
+        command: /usr/lib/icinga2/safe-reload
+...

@@ -1,0 +1,34 @@
+---
+- name: Include OS family specific constants
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Firewall
+  import_tasks: firewall.yml
+
+- name: Install
+  include_tasks: "install-{{ ansible_os_family }}.yml"
+
+- name: never run the client role on an Icinga master server
+  fail:
+    msg: Never run this role on an Icinga master server!
+  when: inventory_hostname in groups.icinga2master|default([])
+
+- name: get local fqdn
+  #command: hostname -f
+  command: hostname
+  register: myfqdn
+
+- name: overwrite fact for ansible_fqdn
+  set_fact: 
+    ansible_fqdn: "{{ myfqdn.stdout }}"
+
+- name: fail when inventory_hostname is not ansible_fqdn
+  fail:
+    msg: "Make sure hostname -f outputs the fqdn configured in your inventory!"
+  when: inventory_hostname != ansible_fqdn
+
+- name: Install for {{ ansible_os_family }}
+  include_tasks: "install-{{ ansible_os_family }}.yml"
+
+- name: Configure client
+  import_tasks: configure-client.yml

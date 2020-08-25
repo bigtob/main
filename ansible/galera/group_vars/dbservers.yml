@@ -1,0 +1,10 @@
+---
+# mysql root user password 
+# not set by default on Ubuntu
+mysql_root_password: password
+
+# Galera cluster name
+cluster_name: icinga2
+
+# Galera synchronisation method
+wsrep_sst_method: rsync

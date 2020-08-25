@@ -1,0 +1,15 @@
+---
+- name: install for {{ ansible_os_family }}
+  include_tasks: "install-{{ ansible_os_family }}.yml"
+
+- name: set mysql root user password
+  include_tasks: mysql-root-user.yml
+
+- name: create galera configuration
+  include_tasks: galera-cnf.yml
+
+- name: configure firewall
+  include_tasks: ufw.yml
+
+- name: flush handlers
+  meta: flush_handlers

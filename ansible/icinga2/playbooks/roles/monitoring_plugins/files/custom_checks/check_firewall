@@ -1,0 +1,59 @@
+#!/bin/bash
+# {{ ansible_managed }}
+
+#Author: Toby
+
+#VARIABLES NAGIOS
+OK=0
+WARNING=1
+CRITICAL=2
+UNKNOWN=3
+
+PROGNAME=`basename $0 .sh`
+VERSION="v0.1"
+
+print_help() {
+    echo $PROGNAME $VERSION
+    echo ""
+    echo "$PROGNAME is a Nagios plugin to check Linux firewall status"
+    echo ""
+    echo "Usage:"
+    echo "     $PROGNAME -l # Show current Linux firewall status"
+    echo "     $PROGNAME -h # Print this help message"
+    exit $OK
+}
+
+while getopts ":lh" opt
+do
+  case ${opt} in
+    h|\?) print_help ;;
+       l) continue ;;
+  esac
+done
+
+if [ $OPTIND -eq 1 ]
+then
+  print_help
+fi
+
+if [ ! $(which systemctl) ]
+then
+  echo -e "WARNING: systemctl command required for this plugin"
+  exit $WARNING
+fi
+
+source /etc/os-release
+VID=$(echo $VERSION_ID | awk -F. '{print $1}')
+case ${ID}${VID} in
+    centos7|centos8) fw=firewalld ; status=$(systemctl is-active $fw) ;;
+    centos5|centos6) fw=iptables ; status=$(service $fw status) ;;
+  ubuntu20|ubuntu16) fw=ufw ; status=$(systemctl is-active $fw) ;;
+                  *) echo -e "WARNING: $PROGNAME doesn't currently support this OS" ; exit $WARNING ;;
+esac
+
+case $status in
+    'active') echo -e "OK: $fw is $status" ; exit $OK ;;
+  'inactive') echo -e "CRITICAL: $fw is $status" ; exit $CRITICAL ;;
+         '*') echo -e "UNKNOWN: unknown $fw status" ; exit $UNKNOWN ;;
+esac
+

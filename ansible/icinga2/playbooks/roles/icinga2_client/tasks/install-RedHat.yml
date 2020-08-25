@@ -1,0 +1,38 @@
+---
+- name: enable required repos
+  yum:
+    name:
+      - epel-release
+      - centos-release-scl
+      - "https://packages.icinga.com/epel/icinga-rpm-release-{{ ansible_distribution_major_version }}-latest.noarch.rpm"
+  when: >
+    ansible_distribution == "CentOS"
+    and ansible_distribution_major_version is version('7', '<=')
+
+- name: enable required repos
+  yum:
+    name:
+      - epel-release
+      - https://packages.icinga.com/epel/icinga-rpm-release-8-latest.noarch.rpm
+  when: >
+    ansible_distribution == "CentOS"
+    and ansible_distribution_major_version is version('8', '==')
+
+- name: install icinga2
+  yum:
+    name:
+      - icinga2
+      - icinga2-selinux
+    state: present
+    enablerepo: "{{ icinga2_rpm_repo }}"
+  when: ansible_distribution_major_version > '6'
+  notify: restart icinga2
+
+- name: install icinga2 (no Icinga selinux policy available for EL 6)
+  yum:
+    name:
+      - icinga2
+    state: installed
+    enablerepo: "{{ icinga2_rpm_repo }}"
+  when: ansible_distribution_major_version == '6'
+  notify: restart icinga2

@@ -1,0 +1,52 @@
+#!/bin/bash
+# {{ ansible_managed }}
+
+#Author: Toby
+
+#VARIABLES NAGIOS
+OK=0
+WARNING=1
+CRITICAL=2
+UNKNOWN=3
+
+PROGNAME=`basename $0 .sh`
+VERSION="v0.1"
+
+print_help() {
+    echo $PROGNAME $VERSION
+    echo ""
+    echo "$PROGNAME is a Nagios plugin to check SELinux status"
+    echo ""
+    echo "Usage:"
+    echo "     $PROGNAME -l # Show current SELinux status"
+    echo "     $PROGNAME -h # Print this help message"
+    exit $OK
+}
+
+while getopts ":lh" opt
+do
+  case ${opt} in
+    h|\?) print_help ;;
+       l) continue ;;
+  esac
+done
+
+if [ $OPTIND -eq 1 ]
+then
+  print_help
+fi
+
+if [ ! $(which getenforce) ]
+then
+  echo -e "WARNING: getenforce command required for this plugin"
+  exit $WARNING
+fi
+
+status=$(getenforce)
+
+case $status in
+   'Enforcing') echo -e "OK: SELinux mode is $status" ; exit $OK ;;
+  'Permissive') echo -e "WARNING: SELinux mode is $status" ; exit $WARNING ;;
+    'Disabled') echo -e "CRITICAL: SELinux mode is $status" ; exit $CRITICAL ;;
+           '*') echo -e "UNKNOWN: unknown SELinux status" ; exit $UNKNOWN ;;
+esac

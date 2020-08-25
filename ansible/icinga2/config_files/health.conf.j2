@@ -1,0 +1,23 @@
+/*
+ * Master file location: /etc/ansible/icinga2/config_files
+ */
+
+apply Service "satellite-zone-health" {
+  check_command = "cluster-zone"
+  check_interval = 30s
+  retry_interval = 10s
+
+  vars.cluster_zone = "satellite"
+
+  assign where match("{{ groups.icinga2master|first }}", host.name)
+}
+
+apply Service "satellite-zone-health" {
+  check_command = "cluster-zone"
+  check_interval = 30s
+  retry_interval = 10s
+
+  vars.cluster_zone = "satellite"
+
+  assign where match("{{ groups.icinga2secondmaster|first }}", host.name)
+}

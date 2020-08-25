@@ -1,0 +1,10 @@
+---
+- name: reload master icinga2
+  command: /usr/lib/icinga2/safe-reload
+  #service:
+  #  name: icinga2
+  #  state: reloaded
+  #  enabled: true
+  delegate_to: "{{ item }}"
+  run_once: true
+  with_items: "{{ groups.icinga2master[0] }}"

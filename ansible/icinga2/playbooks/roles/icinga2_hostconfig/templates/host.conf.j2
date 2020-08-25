@@ -1,0 +1,100 @@
+#jinja2: trim_blocks: "true", lstrip_blocks: "true"
+# {{ ansible_managed }}
+
+object Host "{{ inventory_hostname }}" {
+  /* Import host template defined in `templates.conf`. */
+  {% if icinga_hv_is_firewalled|default(false) %}
+  import "generic-host-no-ping"
+  {% else %}
+  import "generic-host"
+  {% endif %}
+
+  vars.client_endpoint = name
+
+  {% if icinga_zone is defined or icinga_is_satellite|default(false) %}
+  vars.is_satellite = true
+  {% endif %}
+  {% if inventory_hostname in groups.icinga2master|default([]) %}
+  vars.icinga_zone = "master"
+  {% else %}
+  vars.icinga_zone = "{{ icinga_zone|default(inventory_hostname) }}"
+  {% endif %}
+
+  /* Specify the address attributes for checks e.g. `ssh` or `http`. */
+  address = "{{ ansible_default_ipv4.address }}"
+  /* address6 = "::1" */
+
+  {% if icinga2_hostconfig_ansible_groups %}
+  /* Host groups based on Ansible inventory groups */
+  {% for group in hostvars[inventory_hostname].group_names %}
+  groups += [ "{{ group }}" ]
+  {% endfor %}
+  {% endif %}
+
+  /* Set custom attribute `os` for hostgroup assignment in `groups.conf`. */
+  vars.os = "{{ ansible_system }}"
+  vars.ansible_os_family = "{{ ansible_os_family }}"
+  vars.ansible_distribution_major_version = "{{ ansible_distribution_major_version }}"
+
+  /* Define disks and attributes for service apply rules in `services.conf`. */
+  vars.disks["disk"] = {
+    /* No parameters. */
+  }
+
+  /* Notify by e-mail to the following groups */
+  vars.notification.mail.groups = {{ icinga_mail_notification_groups }}
+
+  /* variables used for http(s) monitoring */
+  {% if vhosts is defined %}
+  {% for v in vhosts %}
+  {% if v.delete is not defined %}
+  {% if v.monitoring == true %}
+  {% if v.ssl is defined and v.ssl != false %}
+  vars.vhosts_https["{{ v.url }}"] = {
+  }
+  {% else %}
+  vars.vhosts_http["{{ v.url }}"] = {
+  }
+  {% endif %}
+  {% endif %}
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+
+  /* variables used for solr monitoring */
+  {% if solr_cores is defined %}
+  {% for core in solr_cores %}
+  {% if core.delete is not defined %}
+  vars.solr_uri = "/solr/{{ core.name }}/admin/ping"
+  vars.solr_auth_pair = "{{ core.name }}:{{ core.pass }}"
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+
+  {% for key in query('varnames', '^icinga_hv_')|sort %}
+  {%   if loop.first %}
+  /* Dynamic variables */
+  /* Icinga2 dynamic variables based on the Ansible inventory */
+  {%   endif %}
+  vars.{{ key|replace('icinga_hv_', '') }} = {{ lookup('vars', key)|to_json }}
+  {% endfor %}
+
+}
+
+{% if inventory_hostname not in groups.icinga2master and icinga_is_client %}
+object Endpoint "{{ inventory_hostname }}" {
+    /* Top down communication: Satellite(s) --> Client */
+    host = "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
+}
+
+{% if not icinga_is_satellite|default(false) %}
+{# satellite zones are defined in satellite.d #}
+{# https://icinga.com/docs/icinga2/latest/doc/15-troubleshooting/#zones-in-zones-doesnt-work #}
+object Zone "{{ icinga_zone|default(inventory_hostname) }}" {
+
+  parent = "{{ icinga_parent.zone }}"
+  endpoints = [ "{{ inventory_hostname }}" ]
+
+}
+{% endif %}
+{% endif %}

@@ -1,0 +1,8 @@
+---
+# vars file for client zone and endpoint setup
+
+icinga_parent:
+  zone: satellite-hav
+  endpoints:
+    - "{{ groups.icinga2satellitehav[0] }}"
+    - "{{ groups.icinga2satellitehav[1] }}"

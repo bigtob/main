@@ -1,0 +1,19 @@
+/*
+ * Master file location: /etc/ansible/icinga2/config_files
+ */
+
+object Service "cluster" {
+  check_command = "cluster"
+  check_interval = 5s
+  retry_interval = 1s
+
+  host_name = "{{ groups.icinga2master|first }}"
+}
+
+object Service "cluster" {
+  check_command = "cluster"
+  check_interval = 5s
+  retry_interval = 1s
+
+  host_name = "{{ groups.icinga2secondmaster|first }}"
+}

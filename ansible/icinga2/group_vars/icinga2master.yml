@@ -1,0 +1,17 @@
+---
+icinga2_admin_email: it.operations@technologi.co.uk
+icinga2_ticketsalt: password
+icinga2_idodb_user: icinga2
+icinga2_idodb_pass: password
+icinga2_idodb_host: localhost
+icinga2_idodb_name: icinga2
+icinga2_idodb_enable_ha: "true"
+icinga2_user: nagios
+master1: testmaster
+master2: testmaster2
+# HAV
+satellite1: satellite1
+satellite2: satellite2
+# FAB
+satellite3: satellite3
+satellite4: satellite4

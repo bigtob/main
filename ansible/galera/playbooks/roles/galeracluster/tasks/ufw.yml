@@ -1,0 +1,19 @@
+---
+- name: register service_facts
+  service_facts:
+  register: services    
+
+- name: open firewall ports
+  ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+  loop:
+    - { port: '3306', proto: 'tcp' }
+    - { port: '4567', proto: 'tcp' }
+    - { port: '4568', proto: 'tcp' }
+    - { port: '4444', proto: 'tcp' }
+    - { port: '4567', proto: 'udp' }
+  when:
+    - services.ansible_facts.services.ufw is defined
+    - services.ansible_facts.services.ufw.state == "running"

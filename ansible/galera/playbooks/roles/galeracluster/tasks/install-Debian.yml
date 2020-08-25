@@ -1,0 +1,28 @@
+---
+- name: get the MariaDB repository apt-key
+  apt_key:
+    url: https://mariadb.org/mariadb_release_signing_key.asc 
+    state: present
+  register: result
+  retries: 3
+  delay: 3
+  until: result is not failed
+
+- name: add MariaDB repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://mirrors.ukfast.co.uk/sites/mariadb/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} main"
+    state: present
+
+- name: install packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - "mariadb-server-{{ mariadb_version }}"
+    - rsync
+    - python3-pip
+
+- name: install PyMySQL python module
+  pip:
+    name: PyMySQL
+    executable: pip3
