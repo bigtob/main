@@ -27,10 +27,16 @@ Created new plugin centos1:/etc/ansible/icinga2/playbooks/roles/monitoring_plugi
 Ansible copies firewall.conf from /etc/ansible/icinga2/playbooks/roles/icinga2_checks/templates/checks/linux 
 to /etc/icinga2/zones.d/global-templates/checks/linux via /etc/ansible/icinga2/playbooks/roles/icinga2_checks/tasks/main.yml
 CheckCommand object added to /etc/ansible/icinga2/playbooks/roles/icinga2_master/templates/global-templates/commands.conf
+*** selinux issues on client2
+
+### ido
+This is using a built-in check and is configured in /etc/ansible/icinga2/playbooks/roles/icinga2_checks/templates/checks/all/ido.conf
+Gets installed to /etc/icinga2/zones.d/global-templates/checks/all
 
 ### TO-DO
 Proper check_time for (time.conf) chronyd and timesyncd
 Need to fix /etc/icinga2/zones.d/global-templates/checks/linux/time.conf
+Set 'assign where ! host.vars.client_endpoint' to switch it off
 change vars.ntp_address = "2.centos.pool.ntp.org" to temporarily fix
 
 #################

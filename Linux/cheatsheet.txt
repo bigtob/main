@@ -1,8 +1,12 @@
 ### SELinux
 
 # check policy issues for today
-ausearch -m AVC,USER_AVC -ts today
+ausearch -m AVC,USER_AVC,SELINUX_ERR,USER_SELINUX_ERR -ts recent
 journalctl -t setroubleshoot --since=15:45
+
+# to use sealert you need the following:
+yum install -y policycoreutils-python-utils setroubleshoot-server
+
 
 chcon -t nagios_unconfined_plugin_exec_t check_selinux
 
