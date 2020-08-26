@@ -49,6 +49,7 @@ ansible-playbook playbooks/prepare-master.yml -i icinga2_hosts2
 ################
 # First master #
 ################
+# Run prepare master as required
 # This also installs icingaweb2
 # Ensure group_vars file is correct for icinga2master.yml including master/satellite host names and db details and enable_ha etc.
 # If the DB is remote, a suitable user will need to be used! (ie not localhost)

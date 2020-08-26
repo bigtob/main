@@ -1,3 +1,7 @@
+### Useful
+echo "set -o vi" >> /root/.bash_profile && source /root/.bash_profile
+
+
 ### SELinux
 
 # check policy issues for today
