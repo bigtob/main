@@ -5,4 +5,6 @@ https://community.icinga.com/t/galera-mysql-cluster-with-vips-and-haproxy-for-id
 cd /etc/ansible/galera/playbooks
 ansible-playbook -i ../galera_hosts galera-cluster.yml -e "newcluster=true"
 
+/etc/mysql/conf.d/galera.cnf
+galera_new_cluster
 mysql -u root -e "SHOW STATUS LIKE 'wsrep_cluster_size'"
