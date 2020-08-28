@@ -10,14 +10,6 @@ echo "ubuntu1" >> /etc/ansible/hosts
 # Add user on ubuntu1
 adduser --gecos "User for Ansible automation" ansible # password is ansible
 
-# Setup ssh access from root@centos1 to [root|ansible]@ubuntu1
-ssh-copy-id -i /root/.ssh/id_rsa.pub ansible@ubuntu1
-sudo sed -i '/^\#PermitRootLogin.*/a PermitRootLogin yes' /etc/ssh/sshd_config 
-sudo systemctl restart sshd
-ssh-copy-id -i /root/.ssh/id_rsa.pub client2
-ssh ansible@ubuntu1 date
-ssh ubuntu1 date
-
 # -------------------------
 # Test Ansible from centos1
 # -------------------------
@@ -63,23 +55,6 @@ Now browse to http://192.168.1.203/icingaweb2/authentication/login (icingaadmin/
 # Edit group_vars file icinga2secondmaster.yml with icinga2_idodb_host and host names for masters/satellites
 ansible-playbook -i icinga2_hosts playbooks/icinga2-second-master.yml
 
-Issues:
-/etc/ansible/icinga2/playbooks/roles/icinga2_hostconfig/handlers/main.yml
-changed from service to command ("/usr/lib/icinga2/safe-reload")
-
-zones.conf on the masters need "host" attributes for each other - needs fixing in template code - CHECK THIS
-zones.conf on the satellite needs updating with second master - needs fixing in template code - CREATE TEMPLATE
-enable_ha = true on both servers - needs fixing in template code
-
-https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-available-master-icinga2/
-
-# https://icinga.com/docs/icinga2/latest/doc/14-features/#db-ido-in-cluster-ha-zones
-# ido-mysql feature needs enabling on the second master
-# ll /etc/icinga2/features-available/ido-mysql.conf
-# icinga2 feature enable ido-mysql
-# HA mode SHOULD be enabled automatically:
-# https://icinga.com/docs/icinga2/latest/doc/06-distributed-monitoring/#distributed-monitoring-high-availability-db-ido
-
 #####################
 # Install satellite #
 #####################
@@ -96,13 +71,7 @@ https://monitoring-portal.org/woltlab/index.php?thread/38548-configuring-high-av
 #
 # The playbook runs for hosts: icinga2satellitehav:icinga2satellitefab
 cd /etc/ansible/icinga2
-ansible-playbook -i icinga2_hosts2 ./playbooks/icinga2-satellite.yml
-
-Issues: 
-1) ansible_fqdn fact HAS to match hostname -f command, and be the same in the inventory ?? Check this
-edited /etc/ansible/icinga2/playbooks/roles/icinga2_client/tasks/main.yml 
-
-2) delegated icinga2 restart on centos81 sometimes fails - normally works with /usr/lib/icinga2/safe-reload
+ansible-playbook -i icinga2_hosts3 ./playbooks/icinga2-satellite.yml
 
 ##################
 # Install client #

@@ -1,6 +1,10 @@
 ### Useful
 echo "set -o vi" >> /root/.bash_profile && source /root/.bash_profile
+sed -i '/^\#PermitRootLogin.*/a PermitRootLogin yes' /etc/ssh/sshd_config 
+systemctl restart sshd
+echo "root:yasmine" | chpasswd
 
+ssh-copy-id -i /root/.ssh/id_rsa.pub <host>
 
 ### SELinux
 
