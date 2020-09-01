@@ -35,6 +35,13 @@ firewall-cmd --add-service=https --permanent
 firewall-cmd --reload
 firewall-cmd --list-services
 
+### iptables
+iptables -L
+iptables -I INPUT -p tcp --dport 5665 -j ACCEPT # insert in chain
+iptables -A INPUT -p tcp --dport 5665 -j ACCEPT # append (may be a drop rule above it!)
+iptables -D INPUT -p tcp --dport 5665 -j ACCEPT # delete
+service iptables save
+
 ### apt
 apt install icinga2 (-y)
 apt list --installed icinga2
