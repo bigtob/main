@@ -10,6 +10,3 @@
 
 - name: configure firewall
   include_tasks: ufw.yml
-
-- name: flush handlers
-  meta: flush_handlers

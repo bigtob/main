@@ -1,25 +1,29 @@
 [icinga2master]
-centos81 # Configuration/Primary master
-master2  # Secondary master
+master1  # Configuration/Primary master
 
 [icinga2secondmaster]
-master2
+master2 # Secondary master
 
 [icingaweb2]
-centos81
-
-[icinga2satellite]
-centos82
+master1
 
 [icinga2satellitehav]
+havsat1
+havsat2
 
 [icinga2satellitefab]
+fabsat1
+fabsat2
+
+[icinga2dbserver]
+galera1
+galera2
+galera3
 
 [icinga2client]  
-client1 # CentOS 8
-client2 # CentOS 8
-client3 # CentOS 7
-client4 # Ubuntu 20
-
-[ansible]
-centos1
+centos6
+#centos7
+#centos8
+#ubuntu16
+#ubuntu18
+ubuntu20

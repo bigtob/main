@@ -1,5 +1,5 @@
 ---
-- name: get the MariaDB repository apt-key
+- name: get the mariadb repository apt-key
   apt_key:
     url: https://mariadb.org/mariadb_release_signing_key.asc 
     state: present
@@ -8,21 +8,32 @@
   delay: 3
   until: result is not failed
 
-- name: add MariaDB repository
+- name: add mariadb repository
   apt_repository:
     repo: "deb [arch=amd64] https://mirrors.ukfast.co.uk/sites/mariadb/repo/{{ mariadb_version }}/{{ ansible_distribution|lower }} {{ ansible_distribution_release }} main"
     state: present
 
-- name: install packages
+- name: install mariadb package
+  apt:
+    name: "mariadb-server-{{ mariadb_version }}"
+    state: present
+
+- name: install supplemental packages
   apt:
     name: "{{ item }}"
     state: present
   loop:
-    - "mariadb-server-{{ mariadb_version }}"
     - rsync
-    - python3-pip
+    - python3-pymysql
 
-- name: install PyMySQL python module
-  pip:
-    name: PyMySQL
-    executable: pip3
+- name: check for existence of /etc/mysql/conf.d/galera.cnf
+  stat: 
+    path: /etc/mysql/conf.d/galera.cnf
+  register: galeraconf
+
+- name: start mysql
+  service:
+    name: mysql
+    state: started
+    enabled: true
+  when: galeraconf.stat.exists == False

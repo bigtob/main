@@ -1,12 +1,23 @@
 ---
+- name: configure root .my.cnf
+  template: 
+    src: my.cnf.j2
+    dest: /root/.my.cnf
+    owner: root
+    group: root
+    mode: 0600
+  register: mycnf
+
 - name: set root user password
   mysql_user:
     host: "{{ item }}"
-    login_user: root
-    login_password:
+    login_unix_socket: /run/mysqld/mysqld.sock
     name: root
     password: "{{ mysql_root_password }}"
-    state: present
   loop:
-    - 127.0.0.1
+    - "{{ ansible_hostname }}"
+    - "127.0.0.1"
+    - "::1"
     - localhost
+  when: mycnf.changed
+  no_log: True

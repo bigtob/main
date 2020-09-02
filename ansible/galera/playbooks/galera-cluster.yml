@@ -5,15 +5,17 @@
     - role: galeracluster
 
 - hosts: dbservers[0]
+  vars:
+    newcluster: False
   tasks:
     - name: initialise new cluster 
       command: galera_new_cluster
-      when: newcluster 
+      when: newcluster
 
 - hosts: dbservers
   tasks:
     - name: start mysql
       service:
         name: mysql
-        started: started
-        true: true
+        state: started
+        enabled: true

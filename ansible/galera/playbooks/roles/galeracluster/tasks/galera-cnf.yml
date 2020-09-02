@@ -4,3 +4,5 @@
     src: galera.cnf.j2
     dest: /etc/mysql/conf.d/galera.cnf
   notify: stop mysql
+
+- meta: flush_handlers
