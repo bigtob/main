@@ -2,7 +2,7 @@ https://www.digitalocean.com/community/tutorials/how-to-configure-a-galera-clust
 
 https://community.icinga.com/t/galera-mysql-cluster-with-vips-and-haproxy-for-ido-mysql-and-more/407
 
-cd /etc/ansible/galera/playbooks
+cd /repos/main/ansible/galera/playbooks
 ansible-playbook -i ../galera_hosts galera-cluster.yml -e "newcluster=true"
 
 /etc/mysql/conf.d/galera.cnf

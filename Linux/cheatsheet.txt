@@ -3,8 +3,17 @@ echo "set -o vi" >> /root/.bash_profile && source /root/.bash_profile
 sed -i '/^\#PermitRootLogin.*/a PermitRootLogin yes' /etc/ssh/sshd_config 
 systemctl restart sshd
 echo "root:yasmine" | chpasswd
-
+alias ll='ls -alF'
 ssh-copy-id -i /root/.ssh/id_rsa.pub <host>
+
+### git
+git config --global user.email "root@ansible1"
+git config --global user.name "bigtob"
+git add -A
+git commit -m "my message"
+git push
+bigtob
+BYft6Ktq9x9a3QE
 
 ### SELinux
 

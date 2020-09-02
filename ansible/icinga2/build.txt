@@ -1,32 +1,13 @@
-# Add Ansible repo on centos1
-yum install -y centos-release-ansible-29
+###########
+# Ansible #
+###########
+apt install -y ansible
 
-# Install Ansible on centos1
-yum install -y ansible
-
-# Setup hosts on centos1
-echo "ubuntu1" >> /etc/ansible/hosts
-
-# Add user on ubuntu1
-adduser --gecos "User for Ansible automation" ansible # password is ansible
-
-# -------------------------
-# Test Ansible from centos1
-# -------------------------
-ansible -m ping all -e ansible_user=ansible # can also just use --user ansible here
-ansible -m ping all
-
-# --------------------------------------
-# Install collection from Ansible galaxy
-# --------------------------------------
-# https://galaxy.ansible.com/fiaasco/icinga2 
-# Other useful links: 
-# https://gitlab.com/bodsch/ansible-icinga2
-# https://git.coop/webarch/icinga-network
-# https://git.coop/webarch/icinga
-# https://git.coop/webarch/icingaweb
-# cd /root/.ansible/collections/ansible_collections/fiaasco/icinga2
-# ansible-galaxy install -r requirements.yml # this will install the [mariadb|php7|apache] roles from "fiaasco" (though these only seem to be used on Debian installations)
+#######
+# Git #
+#######
+mkdir /repos ; cd /repos
+git clone https://github.com/bigtob/main.git
 
 #############
 # inventory #
@@ -45,7 +26,7 @@ ansible -m ping all -i icinga2_hosts
 
 ansible-playbook -i icinga2_hosts ./playbooks/icinga2-master.yml
 
-Now browse to http://192.168.1.203/icingaweb2/authentication/login (icingaadmin/password)
+Now browse to http://192.168.1.XXX/icingaweb2/authentication/login (icingaadmin/password)
 
 #################
 # Second master #

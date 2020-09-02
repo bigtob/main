@@ -42,10 +42,14 @@ cd /usr/lib/nagios/plugins
 wget https://raw.githubusercontent.com/willixix/naglio-plugins/master/check_redis.pl
 chmod 700
 ./check_redis.pl -H 127.0.0.1 -x password
-mv check_redis.pl check_redis
 
 https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/#redis
-*** WIP *** /etc/icinga2/zones.d/global-templates/redis.conf
+CheckCommand definitions are in /usr/share/icinga2/include/plugins-contrib.d/databases.conf
+
+To assign to a client add vars in host.conf file e.g.:
+  /* variables used for redis monitoring */
+  vars.redis = true
+  vars.redis_password = "password"
 
 
 ### TO-DO
