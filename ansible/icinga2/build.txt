@@ -21,7 +21,7 @@ ansible -m ping all -i icinga2_hosts
 ################
 # This also installs icingaweb2
 # Ensure group_vars file is correct for:
-#    icinga2master.yml including master/satellite host names and db details and enable_ha etc.
+#    icinga2master.yml including master/satellite hostnames, db host/details, config_files etc.
 #    icingaweb2.yml including icinga_idodb_host/icingaweb_db_host/passwords etc.
 
 ansible-playbook -i icinga2_hosts ./playbooks/icinga2-master.yml
@@ -73,45 +73,6 @@ I have 'fixed' this by adding a '-x critical' to the command above in /usr/lib/i
 # Client reprovision from scratch
 ansible-playbook -i icinga2_hosts2 ./playbooks/icinga2-client.yml -e "icinga_client_reprovision='true'"
 fix deprecation warnings for this!
-
-##########################
-# MariaDB/MySQL commands #
-##########################
-mysql
-show databases;
-connect icingaweb;
-show tables;
-select * from icingaweb_user ;
-
-select Host, User, Password from mysql.user;
-create user 'icinga2'@'192.168.1.209' identified by 'password';
-select Host, User, Password from mysql.user;
-grant all privileges on icinga2.* to 'icinga2'@'192.168.1.209';
-FLUSH PRIVILEGES; # needed after grant to apply privs
-
-edited /etc/my.cnf.d/mariadb-server.cnf (or /etc/mysql/mysql.conf.d/mysqld.cnf) and changed 'bind-address = 0.0.0.0' 
-
-Show whether icinga2 is updating the db:
-
-MariaDB [icinga2]>  SELECT status_update_time FROM icinga_programstatus ps
-    -> JOIN icinga_instances i ON ps.instance_id=i.instance_id
-    -> WHERE (UNIX_TIMESTAMP(ps.status_update_time) > UNIX_TIMESTAMP(NOW())-60)
-    -> AND i.instance_name='default';
-+---------------------+
-| status_update_time  |
-+---------------------+
-| 2020-07-29 13:29:27 |
-+---------------------+
-1 row in set (0.001 sec)
-
-##############################################
-# Generate a new salt and encrypted password #
-##############################################
-salt=$(openssl rand -base64 6)
-openssl passwd -1 -salt $salt password
-$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0
-UPDATE icingaweb_user SET password_hash='$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0' WHERE name = 'icingaadmin';
-mysql -u icingaweb --password=password
 
 #########
 # Zones #

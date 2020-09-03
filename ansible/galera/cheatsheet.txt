@@ -8,3 +8,45 @@ ansible-playbook -i ../galera_hosts galera-cluster.yml -e "newcluster=true"
 /etc/mysql/conf.d/galera.cnf
 galera_new_cluster
 mysql -u root -e "SHOW STATUS LIKE 'wsrep_cluster_size'"
+
+##########################
+# MariaDB/MySQL commands #
+##########################
+mysql
+show databases;
+connect icingaweb;
+show tables;
+select * from icingaweb_user ;
+
+select Host, User, Password from mysql.user;
+create user 'icinga2'@'192.168.1.209' identified by 'password';
+create user 'icinga2'@'DESKTOP-IM8V9AS' identified by 'password';
+select Host, User, Password from mysql.user;
+grant all privileges on icinga2.* to 'icinga2'@'192.168.1.209';
+grant all privileges on icingaweb.* to 'icingaweb'@'DESKTOP-IM8V9AS';
+FLUSH PRIVILEGES; # needed after grant to apply privs
+
+edited /etc/my.cnf.d/mariadb-server.cnf (or /etc/mysql/mysql.conf.d/mysqld.cnf) and changed 'bind-address = 0.0.0.0' 
+
+Show whether icinga2 is updating the db:
+
+MariaDB [icinga2]>  SELECT status_update_time FROM icinga_programstatus ps
+    -> JOIN icinga_instances i ON ps.instance_id=i.instance_id
+    -> WHERE (UNIX_TIMESTAMP(ps.status_update_time) > UNIX_TIMESTAMP(NOW())-60)
+    -> AND i.instance_name='default';
++---------------------+
+| status_update_time  |
++---------------------+
+| 2020-07-29 13:29:27 |
++---------------------+
+1 row in set (0.001 sec)
+
+##############################################
+# Generate a new salt and encrypted password #
+##############################################
+salt=$(openssl rand -base64 6)
+openssl passwd -1 -salt $salt password
+$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0
+UPDATE icingaweb_user SET password_hash='$1$gASNyotX$va/10rmrQnf7r/Rsj0RPT0' WHERE name = 'icingaadmin';
+mysql -u icingaweb --password=password
+
