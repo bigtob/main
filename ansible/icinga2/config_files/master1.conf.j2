@@ -1,8 +1,8 @@
 /*
- * Master file location: /etc/ansible/icinga2/config_files
+ * Master file location: /etc/ansible/icinga2/config_files/master1.conf.j2
  */
 
-object Host "{{ master2 }}" {
+object Host "{{ master1 }}" {
   /* Import host template defined in `templates.conf`. */
   import "generic-host"
 
@@ -11,9 +11,8 @@ object Host "{{ master2 }}" {
   vars.icinga_zone = "master"
 
   /* Specify the address attributes for checks e.g. `ssh` or `http`. */
-  address = "{{ hostvars[groups['icinga2secondmaster'][0]].ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}" 
+  address = "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}" 
   /* address6 = "::1" */
-
 
   /* Set custom attribute `os` for hostgroup assignment in `groups.conf`. */
   vars.os = "{{ ansible_system }}"

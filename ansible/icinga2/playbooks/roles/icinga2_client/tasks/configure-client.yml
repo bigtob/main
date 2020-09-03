@@ -3,17 +3,17 @@
   debug:
     msg: site is defined as {{ site }}
   failed_when: not site
-  when: icinga_is_client
+  when: icinga_is_client|default(False) == True
 
 - name: import zone and endpoint vars for fab clients
   include_vars:
     file: "fab.yml"
-  when: icinga_is_client and site is defined and site == "fab"
+  when: icinga_is_client|default(False) == True and site == "fab"
 
 - name: import zone and endpoint vars for hav clients
   include_vars:
     file: "hav.yml"
-  when: icinga_is_client and site is defined and site == "hav"
+  when: icinga_is_client|default(False) == True and site == "hav"
 
 - name: stop service when reprovisioning
   service:
@@ -51,7 +51,7 @@
   when: icinga_client_reprovision
   notify: restart icinga2
 
-- name: Generate ticket
+- name: generate ticket
   command: icinga2 pki ticket --cn {{ inventory_hostname }} --salt {{ icinga2_ticketsalt }}
   args:
     creates: /etc/icinga2/zones.conf.orig
@@ -69,7 +69,7 @@
     group: "{{ icinga2_user }}"
     mode: 0755
 
-- name: Generate a new local self-signed certificate.
+- name: generate a new local self-signed certificate
   command: >
     icinga2 pki new-cert --cn {{ inventory_hostname }}
     --key /var/lib/icinga2/certs/{{ inventory_hostname }}.key
@@ -78,7 +78,7 @@
     creates: "/var/lib/icinga2/certs/{{ inventory_hostname }}.crt"
   notify: restart icinga2
 
-- name: Request the master certificate from the parent host and store it as ca.crt
+- name: request the master certificate from the parent host and store it as ca.crt
   command: >
     icinga2 pki save-cert
     --key /var/lib/icinga2/certs/{{ inventory_hostname }}.key
@@ -107,7 +107,7 @@
   args:
     creates: /etc/icinga2/zones.conf.orig
   notify: restart icinga2
-  when: icinga_is_client
+  when: icinga_is_client|default(False) == True or icinga_is_secondmaster|default(False) == True
 
 - name: run icinga2 node setup for satellite
   # don't add host and port if host in dmz or master connects to client
@@ -126,11 +126,11 @@
   args:
     creates: /etc/icinga2/zones.conf.orig
   notify: restart icinga2
-  when: icinga_is_satellite
+  when: icinga_is_satellite|default(False) == True
 
 - name: modify /etc/icinga2/zones.conf for satellite-hav server 1
   template:
-    src: "satellite-hav1.j2"
+    src: "{{ config_files}}/satellite-hav1.j2"
     dest: /etc/icinga2/zones.conf
     owner: "{{ icinga2_user }}"
     group: "{{ icinga2_user }}"
@@ -140,7 +140,7 @@
 
 - name: modify /etc/icinga2/zones.conf for satellite-hav server 2
   template:
-    src: "satellite-hav2.j2"
+    src: "{{ config_files}}/satellite-hav2.j2"
     dest: /etc/icinga2/zones.conf
     owner: "{{ icinga2_user }}"
     group: "{{ icinga2_user }}"
@@ -150,7 +150,7 @@
 
 - name: modify /etc/icinga2/zones.conf for satellite-fab server 1
   template:
-    src: "satellite-fab1.j2"
+    src: "{{ config_files}}/satellite-fab1.j2"
     dest: /etc/icinga2/zones.conf
     owner: "{{ icinga2_user }}"
     group: "{{ icinga2_user }}"
@@ -160,7 +160,7 @@
 
 - name: modify /etc/icinga2/zones.conf for satellite-fab server 2
   template:
-    src: "satellite-fab2.j2"
+    src: "{{ config_files}}/satellite-fab2.j2"
     dest: /etc/icinga2/zones.conf
     owner: "{{ icinga2_user }}"
     group: "{{ icinga2_user }}"

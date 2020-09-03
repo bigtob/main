@@ -1,4 +1,0 @@
----
-icinga_is_satellite: true
-icinga_zone: satellite
-icinga2_ticketsalt: password

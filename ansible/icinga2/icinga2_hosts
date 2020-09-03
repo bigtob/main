@@ -1,11 +1,14 @@
 [icinga2master]
-master1  # Configuration/Primary master
+#master1  # Configuration/Primary master
+awsmaster1  # Configuration/Primary master
 
 [icinga2secondmaster]
-master2 # Secondary master
+#master2 # Secondary master
+awsmaster2 # Secondary master
 
 [icingaweb2]
-master1
+#master1
+awsmaster1
 
 [icinga2satellitehav]
 havsat1

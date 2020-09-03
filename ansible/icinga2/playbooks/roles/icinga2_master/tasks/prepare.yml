@@ -1,5 +1,4 @@
 ---
-
 - name: sysctl | tcp/ip tuning
   sysctl:
     sysctl_file: /etc/sysctl.d/icinga.conf

@@ -25,26 +25,49 @@
   mysql_db:
     name: "{{ icingaweb_db_name }}"
     state: present
-  #notify: load database schema
-  register: db_created
+  register: icingawebdb
+  delegate_to: "{{ groups.icinga2dbserver[0] }}"
+
+- name: slurp contents of database schema file
+  slurp:
+    src: /usr/share/icingaweb2/etc/schema/mysql.schema.sql
+  register: icingaweb2schema
+  when: icingawebdb.changed
+
+- name: create temporary database schema file
+  copy:
+    content: "{{ icingaweb2schema['content'] | b64decode }}"
+    dest: /tmp/icingawebdb.sql
+  when: icingawebdb.changed
+  delegate_to: "{{ groups.icinga2dbserver[0] }}"
+
+- name: import icinga2 database schema
+  mysql_db:
+    state: import
+    name: "{{ icingaweb_db_name }}"
+    target: /tmp/icingawebdb.sql
+  when: icingawebdb.changed
+  delegate_to: "{{ groups.icinga2dbserver[0] }}"
+
+- name: remove temporary database schema file
+  file:
+    path: /tmp/icingawebdb.sql
+    state: absent
+  delegate_to: "{{ groups.icinga2dbserver[0] }}"
 
 - name: create icingaweb2 database user
   mysql_user:
     name: "{{ icingaweb_db_user }}"
     password: "{{ icingaweb_db_pass }}"
     priv: "{{ icingaweb_db_name }}.*:ALL"
+    host: "{{ item }}"
     append_privs: true
     state: present
-
-- name: load database schema
-  mysql_db:
-    state: import
-    name: "{{ icingaweb_db_name }}"
-    target: "{{ icinga2_icingaweb2_schema }}"
-  when: db_created.changed
-
-#- name: flush handlers to load database schema
-#  meta: flush_handlers
+  with_items:
+    - "{{ master1 }}"
+    - "{{ master2 }}"
+    - localhost
+  delegate_to: "{{ groups.icinga2dbserver[0] }}"
 
 - name: check if local admin user has correct password set
   command: >
@@ -55,6 +78,7 @@
   register: admin_pass
   tags:
     - skip_ansible_lint
+  delegate_to: "{{ groups.icinga2dbserver[0] }}"
 
 - name: create or update default local admin credentials in database
   command: >
@@ -69,6 +93,7 @@
   when: admin_pass.stdout != icingaweb_admin_pass|password_hash('sha512', icingaweb_password_salt)
   tags:
     - skip_ansible_lint
+  delegate_to: "{{ groups.icinga2dbserver[0] }}"
 
 - name: put configuration templates
   template:

@@ -1,5 +1,4 @@
 ---
-
 - name: enable required repos
   yum:
     name:

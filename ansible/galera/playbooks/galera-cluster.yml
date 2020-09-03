@@ -18,4 +18,4 @@
       service:
         name: mysql
         state: started
-        enabled: true
+        enabled: false

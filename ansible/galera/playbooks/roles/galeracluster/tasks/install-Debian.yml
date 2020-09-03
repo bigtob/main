@@ -35,5 +35,5 @@
   service:
     name: mysql
     state: started
-    enabled: true
+    enabled: false
   when: galeraconf.stat.exists == False

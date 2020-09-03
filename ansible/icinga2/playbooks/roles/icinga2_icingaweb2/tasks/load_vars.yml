@@ -1,6 +1,5 @@
 ---
-
-- name: Include OS family specific vars
+- name: include os family specific vars
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:

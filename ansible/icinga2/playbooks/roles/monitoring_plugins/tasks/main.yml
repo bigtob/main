@@ -19,21 +19,14 @@
   include_tasks: eventhandlers.yml
   when: monitoring_plugins_eventhandlers|bool
 
-- name: build a list of our own custom nagios checks
-  local_action:
-    module: find
-    paths: /etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks
-  register: customnagiosfiles
-
 - name: copy our own custom nagios checks
   copy:
-    src: "{{ item.path }}"
+    src: "{{ item }}"
     dest: "{{ __monitoring_plugins_path }}"
     owner: root
     group: root
     mode: 0755
-  with_items:
-    - "{{ customnagiosfiles.files }}"
+  with_fileglob: "../files/custom_checks/*"
 
 - name: get current SELinux status
   shell: sestatus | grep ^"SELinux status" | awk '{print $NF}'

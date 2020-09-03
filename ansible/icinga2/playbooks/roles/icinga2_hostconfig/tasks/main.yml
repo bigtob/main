@@ -7,8 +7,8 @@
     group: nagios
     mode: 0644
   delegate_to: "{{ groups.icinga2master[0] }}"
+  when: icinga_is_client|default(False) == True
   notify: reload master icinga2
-  when: icinga_is_client
 
 - name: put satellite template on master
   template:
@@ -18,8 +18,8 @@
     group: nagios
     mode: 0644
   delegate_to: "{{ groups.icinga2master[0] }}"
+  when: icinga_is_satellite|default(False) == True
   notify: reload master icinga2
-  when: icinga_is_satellite
 
 - name: copy HostGroups config to icinga master
   template:

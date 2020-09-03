@@ -1,9 +1,10 @@
 ---
-- name: check for service_facts
-  service_facts:
-  register: services
+#- name: check for service_facts
+#  service_facts:
+#  register: services
+#  BUG ON UBUNTU
 
-- name: open icinga ports (ufw)
+- name: ufw | open icinga ports
   ufw:
     rule: allow
     port: "{{ icinga2_network_port }}"
@@ -13,20 +14,14 @@
     - 10.0.0.0/8
     - 172.16.0.0/12
     - 192.168.0.0/16
-  when:
-    - ansible_os_family == "Debian"
-    - services.ansible_facts.services.ufw is defined
-    - services.ansible_facts.services.ufw.state == "running"
-    #- inventory_hostname in groups.dmz|default([])
+  when: ansible_os_family == "Debian"
 
-- name: open icinga ports (firewalld)
+- name: firewalld | open icinga ports
   firewalld:
     port: "{{ icinga2_network_port }}/{{ icinga2_network_proto }}"
     permanent: yes
     state: enabled
     immediate: yes
-  when:
-    - ansible_os_family == "RedHat"
-    - services.ansible_facts.services["firewalld.service"] is defined
-    - services.ansible_facts.services["firewalld.service"].state == "running"
-    #- (inventory_hostname in groups.dmz|default([])
+  when: ansible_os_family == "RedHat"
+    #and services.ansible_facts.services["firewalld.service"] is defined
+    #and services.ansible_facts.services["firewalld.service"].state == "running"

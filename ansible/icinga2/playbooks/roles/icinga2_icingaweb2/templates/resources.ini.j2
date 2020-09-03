@@ -2,7 +2,7 @@
 [icingaweb_db]
 type = "db"
 db = "mysql"
-host = "localhost"
+host = "{{ icinga2_idodb_host }}"
 port = ""
 dbname = "{{ icingaweb_db_name }}"
 username = "{{ icingaweb_db_user }}"
@@ -13,7 +13,7 @@ persistent = "0"
 [icinga_ido]
 type = "db"
 db = "mysql"
-host = "localhost"
+host = "{{ icinga2_idodb_host }}"
 port = ""
 dbname = "{{ icinga2_idodb_name }}"
 username = "{{ icinga2_idodb_user }}"

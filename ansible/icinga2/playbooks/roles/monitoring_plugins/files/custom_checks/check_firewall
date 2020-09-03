@@ -36,24 +36,38 @@ then
   print_help
 fi
 
-if [ ! $(which systemctl) ]
+if [ -f /etc/os-release ]
 then
-  echo -e "WARNING: systemctl command required for this plugin"
-  exit $WARNING
+  source /etc/os-release
+  VID=$(echo $VERSION_ID | awk -F. '{print $1}')
+elif [ -f /etc/redhat-release ]
+then
+  VID=$(awk -F'[.| ]' '{print tolower($1)$3}' /etc/redhat-release)
 fi
 
-source /etc/os-release
-VID=$(echo $VERSION_ID | awk -F. '{print $1}')
-case ${ID}${VID} in
-    centos7|centos8) fw=firewalld ; status=$(systemctl is-active $fw) ;;
-    centos5|centos6) fw=iptables ; status=$(service $fw status) ;;
-  ubuntu20|ubuntu16) fw=ufw ; status=$(systemctl is-active $fw) ;;
-                  *) echo -e "WARNING: $PROGNAME doesn't currently support this OS" ; exit $WARNING ;;
-esac
-
-case $status in
-    'active') echo -e "OK: $fw is $status" ; exit $OK ;;
+# systemd
+systemdstatus()
+{
+case $1 in
+  'active') echo -e "OK: $fw is $status" ; exit $OK ;;
   'inactive') echo -e "CRITICAL: $fw is $status" ; exit $CRITICAL ;;
-         '*') echo -e "UNKNOWN: unknown $fw status" ; exit $UNKNOWN ;;
+  '*') echo -e "UNKNOWN: unknown $fw status" ; exit $UNKNOWN ;;
+esac
+}
+
+# init
+initdstatus()
+{
+case $1 in
+  'iptables: Firewall is not running.') echo -e "CRITICAL: $fw is not running" ; exit $CRITICAL ;;
+  *) echo -e "OK: $fw is active" ; exit $OK ;;
+esac
+}
+
+case ${ID}${VID} in
+  centos7|centos8) fw=firewalld ; status=$(systemctl is-active $fw) ; systemdstatus $status ;;
+  centos5|centos6) fw=iptables ; status=$(service $fw status) ; initdstatus $status ;;
+  ubuntu20|ubuntu18|ubuntu16) fw=ufw ; status=$(systemctl is-active $fw) ; systemdstatus $status ;;
+  *) echo -e "WARNING: $PROGNAME doesn't currently support this OS" ; exit $WARNING ;;
 esac
 

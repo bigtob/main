@@ -1,3 +1,5 @@
 ---
+config_files: /repos/main/ansible/icinga2/config_files
 icinga2_ticketsalt: password
 icinga_is_client: true
+icinga_is_satellite: false

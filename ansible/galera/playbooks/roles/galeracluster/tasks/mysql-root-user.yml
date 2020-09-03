@@ -6,18 +6,7 @@
     owner: root
     group: root
     mode: 0600
-  register: mycnf
 
 - name: set root user password
-  mysql_user:
-    host: "{{ item }}"
-    login_unix_socket: /run/mysqld/mysqld.sock
-    name: root
-    password: "{{ mysql_root_password }}"
-  loop:
-    - "{{ ansible_hostname }}"
-    - "127.0.0.1"
-    - "::1"
-    - localhost
-  when: mycnf.changed
+  command: mysqladmin --user root password "{{ mysqlrootpassword }}"
   no_log: True

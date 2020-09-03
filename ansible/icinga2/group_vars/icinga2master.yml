@@ -1,17 +1,20 @@
 ---
+config_files: /repos/main/ansible/icinga2/config_files
 icinga2_admin_email: it.operations@technologi.co.uk
 icinga2_ticketsalt: password
 icinga2_idodb_user: icinga2
 icinga2_idodb_pass: password
-icinga2_idodb_host: localhost
+icinga2_idodb_host: galera1
 icinga2_idodb_name: icinga2
 icinga2_idodb_enable_ha: "true"
 icinga2_user: nagios
-master1: testmaster
-master2: testmaster2
+icinga2_is_client: False
+icinga2_is_satellite: False
+master1: awsmaster1
+master2: awsmaster2
 # HAV
-satellite1: satellite1
-satellite2: satellite2
+satellite1: havsat1
+satellite2: havsat2
 # FAB
-satellite3: satellite3
-satellite4: satellite4
+satellite3: fabsat1
+satellite4: fabsat2
