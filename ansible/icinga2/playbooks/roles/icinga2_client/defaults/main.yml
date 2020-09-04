@@ -1,7 +1,7 @@
 ---
 # description: Deploy a normal icinga client or a satellite?
 # type: bool
-icinga_is_satellite: false
+icinga2_is_satellite: false
 
 # description: Icinga parent zone and zone endpoints hostnames.
 #              The default is configured to connect to the master zone.

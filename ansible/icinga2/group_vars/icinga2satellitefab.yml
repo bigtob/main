@@ -1,5 +1,7 @@
 ---
-icinga2_is_client: false
-icinga_is_satellite: true
+config_files: /repos/main/ansible/icinga2/config_files
+icinga2_is_client: False
+icinga2_is_satellite: True
+icinga2_is_secondmaster: False
 icinga_zone: satellite-fab
 icinga2_ticketsalt: password

@@ -7,9 +7,9 @@ icinga2_idodb_host: galera1
 icinga2_idodb_name: icinga2
 icinga2_idodb_enable_ha: "true"
 icinga2_user: nagios
-icinga2_is_client: false
-icinga2_is_satellite: false
-icinga2_is_secondmaster: true
+icinga2_is_client: False
+icinga2_is_satellite: False
+icinga2_is_secondmaster: True
 master1: awsmaster1
 master2: awsmaster2
 # HAV

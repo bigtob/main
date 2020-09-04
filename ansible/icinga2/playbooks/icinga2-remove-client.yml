@@ -70,7 +70,7 @@
           - icingacmd
           - nagios
 
-  - hosts: "{{ groups.icinga2master|first }}"
+  - hosts: "{{ groups.icinga2master[0] }}"
     become: true
     gather_facts: false
     tasks:
@@ -85,6 +85,7 @@
         file:
           path: '{{ matchedfile.files[0].path }}'
           state: absent
+        when: matchedfile.files
 
       - name: verify icinga2 configuration
         command: icinga2 daemon -C

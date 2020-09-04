@@ -11,7 +11,7 @@ object Host "{{ inventory_hostname }}" {
 
   vars.client_endpoint = name
 
-  {% if icinga_zone is defined or icinga_is_satellite|default(false) %}
+  {% if icinga_zone is defined or icinga2_is_satellite|default(false) %}
   vars.is_satellite = true
   {% endif %}
   {% if inventory_hostname in groups.icinga2master|default([]) %}
@@ -81,13 +81,13 @@ object Host "{{ inventory_hostname }}" {
 
 }
 
-{% if inventory_hostname not in groups.icinga2master and icinga_is_client %}
+{% if inventory_hostname not in groups.icinga2master and icinga2_is_client %}
 object Endpoint "{{ inventory_hostname }}" {
     /* Top down communication: Satellite(s) --> Client */
     host = "{{ ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0]) }}"
 }
 
-{% if not icinga_is_satellite|default(false) %}
+{% if not icinga2_is_satellite|default(false) %}
 {# satellite zones are defined in satellite.d #}
 {# https://icinga.com/docs/icinga2/latest/doc/15-troubleshooting/#zones-in-zones-doesnt-work #}
 object Zone "{{ icinga_zone|default(inventory_hostname) }}" {

@@ -3,17 +3,17 @@
   debug:
     msg: site is defined as {{ site }}
   failed_when: not site
-  when: icinga_is_client|default(False) == True
+  when: icinga2_is_client|default(False) == True
 
 - name: import zone and endpoint vars for fab clients
   include_vars:
     file: "fab.yml"
-  when: icinga_is_client|default(False) == True and site == "fab"
+  when: icinga2_is_client|default(False) == True and site == "fab"
 
 - name: import zone and endpoint vars for hav clients
   include_vars:
     file: "hav.yml"
-  when: icinga_is_client|default(False) == True and site == "hav"
+  when: icinga2_is_client|default(False) == True and site == "hav"
 
 - name: stop service when reprovisioning
   service:
@@ -107,7 +107,7 @@
   args:
     creates: /etc/icinga2/zones.conf.orig
   notify: restart icinga2
-  when: icinga_is_client|default(False) == True or icinga_is_secondmaster|default(False) == True
+  when: icinga2_is_client or icinga2_is_secondmaster
 
 - name: run icinga2 node setup for satellite
   # don't add host and port if host in dmz or master connects to client
@@ -126,7 +126,7 @@
   args:
     creates: /etc/icinga2/zones.conf.orig
   notify: restart icinga2
-  when: icinga_is_satellite|default(False) == True
+  when: icinga2_is_satellite|default(False) == True
 
 - name: modify /etc/icinga2/zones.conf for satellite-hav server 1
   template:
