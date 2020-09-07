@@ -1,5 +1,5 @@
 [icinga2master]
-awsmaster1  # Configuration/Primary master
+awsmaster1  ansible_python_interpreter=/usr/bin/python3 # Configuration/Primary master
 
 [icinga2secondmaster]
 awsmaster2 # Secondary master
@@ -21,9 +21,12 @@ galera2
 galera3
 
 [icinga2client]  
-centos6
+galera1
+galera2
+galera3
+#centos6
 #centos7
 #centos8
 #ubuntu16
 #ubuntu18
-ubuntu20
+#ubuntu20

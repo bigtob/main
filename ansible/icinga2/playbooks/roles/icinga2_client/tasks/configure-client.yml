@@ -180,7 +180,7 @@
   notify: restart icinga2
 
 - name: ensure service is running
-  systemd:
+  service:
     name: icinga2
     state: started
     enabled: true

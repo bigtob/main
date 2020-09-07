@@ -32,10 +32,26 @@
   shell: sestatus | grep ^"SELinux status" | awk '{print $NF}'
   register: selinuxstatus
 
+- name: build a list of our own custom nagios checks
+  local_action: 
+    module: shell 
+    _raw_params: "customdir=$(find / -type d -wholename /*/monitoring_plugins/files/custom_checks) ; find $customdir -type f"
+  register: customnagiosfiles
+  when: selinuxstatus.stdout == "enabled"
+
 - name: set SELinux contexts on custom nagios checks
-  command: chcon -t nagios_unconfined_plugin_exec_t "{{ item.path | basename }}"
+  command: chcon -t nagios_unconfined_plugin_exec_t "{{ item | basename }}"
   args:
     chdir: "{{ __monitoring_plugins_path }}"
   with_items:
-    - "{{ customnagiosfiles.files }}"
+    - "{{ customnagiosfiles.stdout_lines }}"
   when: selinuxstatus.stdout == "enabled"
+
+- name: copy check_mysql to check_mysqldb
+  copy:
+    remote_src: yes
+    src: "{{ __monitoring_plugins_path }}/check_mysql"
+    dest: "{{ __monitoring_plugins_path }}/check_mysqldb"
+    owner: root
+    group: root
+    mode: 0755

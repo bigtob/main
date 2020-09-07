@@ -1,0 +1,15 @@
+---
+# site [zone] variable
+# REQUIRED
+site: hav
+
+# redis monitoring
+#icinga_hv_redis: true
+#icinga_hv_redis_password: password
+
+# mysqldb monitoring
+#icinga_hv_mysqldb: true
+#icinga_hv_mysqldb_health_hostname: localhost
+#icinga_hv_mysqldb_health_username: myuser
+#icinga_hv_mysqldb_health_password: mypassword
+#icinga_hv_mysqldb_health_database: mydbname

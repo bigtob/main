@@ -1,2 +1,4 @@
 ---
 site: hav
+icinga_hv_redis: true
+icinga_hv_redis_password: password

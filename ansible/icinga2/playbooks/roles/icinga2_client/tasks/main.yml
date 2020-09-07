@@ -1,11 +1,11 @@
 ---
-- name: Include OS family specific constants
+- name: include OS family specific constants
   include_vars: "{{ ansible_os_family }}.yml"
 
-- name: Firewall
+- name: firewall tasks
   import_tasks: firewall.yml
 
-- name: Install
+- name: install tasks
   include_tasks: "install-{{ ansible_os_family }}.yml"
 
 - name: never run the client role on an Icinga master server
@@ -27,8 +27,8 @@
     msg: "Make sure hostname -f outputs the fqdn configured in your inventory!"
   when: inventory_hostname != ansible_fqdn
 
-- name: Install for {{ ansible_os_family }}
+- name: install for {{ ansible_os_family }}
   include_tasks: "install-{{ ansible_os_family }}.yml"
 
-- name: Configure client
+- name: configure client
   import_tasks: configure-client.yml
