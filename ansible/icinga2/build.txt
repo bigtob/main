@@ -91,10 +91,12 @@ icinga2 daemon -C # performs configuration checks
 icinga2 object list --type host --name client1
 icinga2 object list --type endpoint
 icinga2 object list --type zone --name master
+icinga2 object list --type CheckCommand --name http
 icinga2 ca list --all # list pending signing requests
 icinga2 ca sign [[fingerprint]] # sign the request
 icinga2 node wizard # manually sort the connection
 icinga2 feature list
+/usr/lib/icinga2/safe-reload
 
 yum install -y git
 git clone https://github.com/nbuchwitz/ansible-icinga2.git

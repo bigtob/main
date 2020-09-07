@@ -51,6 +51,40 @@ To assign to a client add vars in host.conf file e.g.:
   vars.redis = true
   vars.redis_password = "password"
 
+### check_mysqldb
+https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/#mysql_health
+https://labs.consol.de/nagios/check_mysql_health/index.html
+#CheckCommand definitions are in /usr/share/icinga2/include/plugins-contrib.d/databases.conf
+n.b. the installed check_mysql and the 'internal' one do not align!
+I copied check_mysql to check_mysqldb (added to Ansible)
+
+e.g. ./check_mysqldb -H localhost -d icingaweb -u icingaweb -p password
+
+To assign to a client, add vars in host.conf file (set in host_vars for Ansible) e.g.:
+  /* variables used for mysql monitoring */
+  vars.mysqldb = true
+  vars.mysqldb_health_hostname = "localhost"
+  vars.mysqldb_health_username = "icingaweb"
+  vars.mysqldb_health_password = "password"
+  vars.mysqldb_health_database = "icingaweb"
+
+Then create the mysqldb.conf file in /etc/icinga2/zones.d/global-templates/checks/services
+And a CheckCommand object in commands.conf (this has been added to the ansible template)
+object CheckCommand "mysqldb" {
+  command = [ PluginDir + "/check_mysqldb" ]
+
+  arguments = {
+    "-H" = "$mysqldb_health_hostname$"
+    "-u" = "$mysqldb_health_username$"
+    "-p" = "$mysqldb_health_password$"
+    "-d" = "$mysqldb_health_database$"
+  }
+}
+
+### check http/s certificates
+This can be achieved via vhosts.conf already in /etc/icinga2/zones.d/global-templates/checks/services
+Add suitable variables in the host.conf file. e.g.:
+
 
 ### TO-DO
 Proper check_time for (time.conf) chronyd and timesyncd

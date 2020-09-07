@@ -4,7 +4,6 @@ echo "alias ll='ls -alF'" >> /root/.bash_profile
 source /root/.bash_profile
 sed -i '/^\#PermitRootLogin.*/a PermitRootLogin yes' /etc/ssh/sshd_config 
 sed -i '/^nameserver.*/i nameserver 192.168.1.254' /etc/resolv.conf
-
 systemctl restart sshd
 echo "root:yasmine" | chpasswd
 
