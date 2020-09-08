@@ -1,6 +1,6 @@
 ---
 # site [zone] variable
-# REQUIRED
+# required for clients
 site: hav
 
 # redis monitoring
@@ -13,3 +13,10 @@ site: hav
 #icinga_hv_mysqldb_health_username: myuser
 #icinga_hv_mysqldb_health_password: mypassword
 #icinga_hv_mysqldb_health_database: mydbname
+
+# systemd monitoring
+# don't use "icinga_hv_" prefix here, create a list
+# e.g. systemd_services: [nginx, apache2, httpd]
+
+# mailq monitoring
+# icinga_hv_mailq: true

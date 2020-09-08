@@ -22,8 +22,8 @@ galera3
 
 [icinga2client]  
 galera1
-galera2
-galera3
+#galera2
+#galera3
 #centos6
 #centos7
 #centos8

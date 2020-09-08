@@ -1,0 +1,56 @@
+#!/bin/bash
+# {{ ansible_managed }}
+
+#Author: Toby
+
+#VARIABLES NAGIOS
+OK=0
+WARNING=1
+CRITICAL=2
+UNKNOWN=3
+
+PROGNAME=`basename $0 .sh`
+VERSION="v0.1"
+
+print_help() {
+    echo $PROGNAME $VERSION
+    echo ""
+    echo "$PROGNAME is a Nagios plugin to check systemd service status"
+    echo ""
+    echo "Usage:"
+    echo "     $PROGNAME -l [service] # Show current systemd service status"
+    echo "     $PROGNAME -h           # Print this help message"
+    exit $OK
+}
+
+while getopts ":l:h:" opt
+do
+  case ${opt} in
+    h|\?|: ) print_help ;;
+         l ) service=${OPTARG} ;;
+  esac
+done
+shift $((OPTIND-1))
+
+if [ $OPTIND -eq 1 ]
+then
+  print_help
+fi
+
+if [[ $(systemctl list-unit-files | grep $service) ]]
+then
+  activestate=$(systemctl is-active $service)
+  enablestate=$(systemctl is-enabled $service)
+else
+  echo -e "WARNING: systemd service \"$service\" not found" 
+  exit $WARNING
+fi
+
+case $activestate$enablestate in 
+  activeenabled) echo -e "OK: systemd service \"$service\" is $activestate and $enablestate" ; exit $OK ;;
+  inactiveenabled) echo -e "CRITICAL: systemd service \"$service\" is $activestate but $enablestate" ; exit $CRITICAL ;;
+  activedisabled) echo -e "WARNING: systemd service \"$service\" is $activestate but $enablestate" ; exit $WARNING ;;
+  inactivedisabled) echo -e "WARNING: systemd service \"$service\" is $activestate and $enablestate" ; exit $WARNING ;;
+  *) echo -e "UNKNOWN: systemd service \"$service\" is in UNKNOWN status" ; exit $UNKNOWN ;;
+esac
+

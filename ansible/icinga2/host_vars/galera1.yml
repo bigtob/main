@@ -1,2 +1,20 @@
 ---
+# site [zone] variable
+# required for clients
 site: fab
+
+# redis monitoring
+#icinga_hv_redis: true
+#icinga_hv_redis_password: password
+
+# mysqldb monitoring
+#icinga_hv_mysqldb: true
+#icinga_hv_mysqldb_health_hostname: localhost
+#icinga_hv_mysqldb_health_username: myuser
+#icinga_hv_mysqldb_health_password: mypassword
+#icinga_hv_mysqldb_health_database: mydbname
+
+# systemd monitoring
+# don't use "icinga_hv_" prefix here, create a list
+# e.g. systemd_services: [nginx, apache2, httpd]
+systemd_services: [mysql, nginx]
