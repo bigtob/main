@@ -69,3 +69,6 @@ apt install icinga2 --reinstall
 
 ### ss
 ss -ln4 # show listening ipv4
+
+### journalctl
+journalctl -u icinga2

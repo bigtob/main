@@ -147,9 +147,25 @@ Enable:
 icingacli module enable jira
 
 Configure:
-install -d -m 2770 -o apache -g icingaweb2 /etc/icingaweb2/modules/jira
+install -d -m 2770 -o www-data -g icingaweb2 /etc/icingaweb2/modules/jira
 vi /etc/icingaweb2/modules/jira/config.ini
+[api]
+host = "technologi.atlassian.net"
+port = 443
+path = "/jira"
+scheme = "https"
+username = "***"
+password = "***"
+
+[ui]
+default_project = "ITOPS"
+default_issuetype = "Incident"
+
+[icingaweb]
+url = "https://awsmaster1.home/icingaweb2"
+
 ...
+
 
 ############
 # Graphite #

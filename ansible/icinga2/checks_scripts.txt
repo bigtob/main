@@ -15,15 +15,16 @@ Commented out "ignore where host.vars.is_satellite"
 ### mailq
 Changed /etc/icinga2/zones.d/global-templates/checks/linux/mailq.conf
 and added && host.vars.mailq == "true"
+This has been added to host.conf.j2 to dynamically build from a icinga_hv in host_vars
 
 ### SELinux
-Created new plugin centos1:/etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks
+Created new plugin script ansible1:/etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks
 Ansible copies selinux.conf from /etc/ansible/icinga2/playbooks/roles/icinga2_checks/templates/checks/linux 
 to /etc/icinga2/zones.d/global-templates/checks/linux via /etc/ansible/icinga2/playbooks/roles/icinga2_checks/tasks/main.yml
 CheckCommand object added to /etc/ansible/icinga2/playbooks/roles/icinga2_master/templates/global-templates/commands.conf
 
 ### firewall
-Created new plugin centos1:/etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks/check_firewall
+Created new plugin script ansible1:/etc/ansible/icinga2/playbooks/roles/monitoring_plugins/files/custom_checks/check_firewall
 Ansible copies firewall.conf from /etc/ansible/icinga2/playbooks/roles/icinga2_checks/templates/checks/linux 
 to /etc/icinga2/zones.d/global-templates/checks/linux via /etc/ansible/icinga2/playbooks/roles/icinga2_checks/tasks/main.yml
 CheckCommand object added to /etc/ansible/icinga2/playbooks/roles/icinga2_master/templates/global-templates/commands.conf
@@ -81,10 +82,30 @@ object CheckCommand "mysqldb" {
   }
 }
 
-### check http/s certificates
+### check_systemd
+A generic script file for checking status of any systemd service
+Created new plugin script icinga2/playbooks/roles/monitoring_plugins/files/custom_checks/check_systemd
+Ansible copies systemd.conf from icinga2/playbooks/roles/icinga2_checks/templates/checks/linux 
+to /etc/icinga2/zones.d/global-templates/checks/linux via icinga2/playbooks/roles/icinga2_checks/tasks/main.yml
+CheckCommand object added to icinga2/playbooks/roles/icinga2_master/templates/global-templates/commands.conf
+
+To assign to a client, add vars in host.conf file (this has been added to host.conf.j2 to dynamically build from a list in host_vars)
+/* variables used for systemd monitoring */
+vars.systemd["nginx"] = {
+}
+vars.systemd["joeblow"] = {
+}
+
+
+
+### check_service ???
+
+### check http/s / certificates
 This can be achieved via vhosts.conf already in /etc/icinga2/zones.d/global-templates/checks/services
 Add suitable variables in the host.conf file. e.g.:
-
+vars.vhosts_http["192.168.1.234"] = {
+  }
+*** This is still WIP ***
 
 ### TO-DO
 Proper check_time for (time.conf) chronyd and timesyncd
