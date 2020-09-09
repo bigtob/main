@@ -60,19 +60,9 @@ ansible-playbook -i icinga2_hosts3 ./playbooks/icinga2-satellite.yml
 # Create a host_vars file for new client with site: specified (or pass as extra variable)
 ansible-playbook -i icinga2_hosts ./playbooks/icinga2-client.yml
 
-Issues:
-RUNNING HANDLER [icinga2_hostconfig : reload master icinga2] *************************************
-failed: [ubuntu1 -> centos81] (item=centos81) => {"ansible_loop_var": "item", "changed": false, "item": 
-"centos81", "msg": "Unable to reload service icinga2: Job for icinga2.service failed.\nSee \"systemctl status icinga2.service\" and \"journalctl -xe\" for details.\n"}
-Caused in line 27 of /usr/lib/icinga2/safe-reload
-Jul 23 12:05:40 centos81 safe-reload[7318]: Validating config files: /usr/lib/icinga2/safe-reload: line 27: /tmp/tmp.Wnu
-It fails because of this: 
-/usr/sbin/icinga2 daemon --validate --color has warnings in it. There are rules files which don't match anywhere.
-I have 'fixed' this by adding a '-x critical' to the command above in /usr/lib/icinga2/safe-reload
-
 # Client reprovision from scratch
 ansible-playbook -i icinga2_hosts2 ./playbooks/icinga2-client.yml -e "icinga_client_reprovision='true'"
-fix deprecation warnings for this!
+*** fix deprecation warnings for this! ***
 
 #########
 # Zones #
@@ -97,24 +87,6 @@ icinga2 ca sign [[fingerprint]] # sign the request
 icinga2 node wizard # manually sort the connection
 icinga2 feature list
 /usr/lib/icinga2/safe-reload
-
-yum install -y git
-git clone https://github.com/nbuchwitz/ansible-icinga2.git
-cd /etc/ansible/icinga2/toby/ansible-icinga2
-ansible-playbook -i icinga2_hosts ./playbooks/icinga2_client.yml
-client1 # icinga2 daemon -C
-firewall-cmd --zone=public --permanent --add-port=5665/tcp
-firewall-cmd --zone=public --permanent --list-ports
-
-#####################
-# Satellite clients #
-#####################
-# From centos1
-# Create host_vars file in /etc/ansible/icinga2/host_vars setting zone: satellite # investigate all.yml or change default zone?
-# cd /etc/ansible/icinga2
-# edit inventory (icinga2_hosts) as required
-ansible-playbook -i icinga2_hosts playbooks/icinga2-client.yml
-# Just the one problem - safe-reload (fails because some scripts don't have valid targets)
 
 ##########################
 # icinga2 web dashboards #
@@ -166,7 +138,6 @@ url = "https://awsmaster1.home/icingaweb2"
 
 ...
 
-
 ############
 # Graphite #
 ############
@@ -180,6 +151,7 @@ systemctl restart icinga2
 #################
 cd /etc/ansible/icinga2
 ansible-playbook playbooks/icinga2-remove-client.yml -i icinga2_hosts -e "client=client3"
+*** DON'T USE - IT BREAKS A REINSTALL ***
 
 ##############
 # Map module #
@@ -202,3 +174,25 @@ charset = "latin1" in [icinga_ido] stanza
 To add hosts to the map, add the variable vars.geolocation = "<latitude,longtitude>" to a host object
 Southbourne: vars.geolocation = "50.8509047,-0.9150602"
 Hedge End: vars.geolocation = "50.9220319,-1.3101452"
+
+###################
+# Themes/Branding #
+###################
+create technologi.less in /usr/share/icingaweb2/public/css/themes
+create dir /usr/share/icingaweb2/public/img/technologi and copy in images
+select theme in portal
+all added to ansible icinga2web role
+
+#############
+# Web users #
+#############
+Currently the authentication is done via the icingaweb database 
+select * from icingaweb_user;
+https://icinga.com/docs/icingaweb2/latest/doc/20-Advanced-Topics/#manual-user-creation-for-database-authentication-backend
+
+If you want to manually create a user:
+php -r 'echo password_hash("yourtopsecretpassword", PASSWORD_DEFAULT);'
+INSERT INTO icingaweb_user (name, active, password_hash) VALUES ('youruser', 1, 'yourhash');
+
+Easier to create user in the UI. Add team members to the Administrators role (comma separated list)
+This will show in /etc/icingaweb2/roles.ini
