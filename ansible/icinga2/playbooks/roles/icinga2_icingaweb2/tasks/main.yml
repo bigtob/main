@@ -146,5 +146,36 @@
     group: icingaweb2
     mode: 0755
 
+- name: copy corporate theme files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0644
+  with_items:
+    - { src: 'technologi.less', dest: '/usr/share/icingaweb2/public/css/themes' }
+    - { src: 'ATLANTA3_web.jpg', dest: '/usr/share/icingaweb2/public/img/technologi/' }
+    - { src: 'technologi_logo_HR.png', dest: '/usr/share/icingaweb2/public/img/technologi/' }
+    - { src: 'technologi_logo_LR.png', dest: '/usr/share/icingaweb2/public/img/technologi/' }
+    - { src: 'technologi_logo_WO_HR.png', dest: '/usr/share/icingaweb2/public/img/technologi/' }
+    - { src: 'technologi_logo_WO_LR.png', dest: '/usr/share/icingaweb2/public/img/technologi/' }
+    - { src: 'technologi_favicon.png', dest: '/usr/share/icingaweb2/public/img/technologi/' }
+
+- name: back up existing favicon.png
+  copy:
+    src: /usr/share/icingaweb2/public/img/favicon.png
+    dest: /usr/share/icingaweb2/public/img/favicon.png.orig
+    mode: preserve
+    remote_src: yes
+  args:
+    creates: /usr/share/icingaweb2/public/img/favicon.png.orig
+
+- name: create symbolic link to corporate favicon
+  shell: ln -sf technologi/technologi_favicon.png favicon.png
+  args:
+    chdir: /usr/share/icingaweb2/public/img
+    warn: false
+
 - name: configure firewall for http/https
   include_tasks: "firewall.yml"

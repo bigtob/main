@@ -18,7 +18,7 @@ port = ""
 dbname = "{{ icinga2_idodb_name }}"
 username = "{{ icinga2_idodb_user }}"
 password = "{{ icinga2_idodb_pass }}"
-charset = ""
+charset = "latin1"
 persistent = "0"
 
 {% for l in icingaweb_ldap_servers %}
