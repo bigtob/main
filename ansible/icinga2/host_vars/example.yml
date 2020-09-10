@@ -1,22 +1,60 @@
 ---
+# This is an example host_vars file. Copy this to <yourhost>.yml and comment
+# in/out what you need. 
+# Anything prefix'd icinga_hv will be rendered as vars.<varname> in the <yourhost>.conf file on the master. e.g. icinga_hv_redis: true ==> vars.redis = "true" 
+
 # site [zone] variable
-# required for clients
+# REQUIRED for clients
 site: hav
 
-# redis monitoring
+####################
+# redis monitoring #
+####################
 #icinga_hv_redis: true
 #icinga_hv_redis_password: password
 
-# mysqldb monitoring
+######################
+# mysqldb monitoring #
+######################
 #icinga_hv_mysqldb: true
 #icinga_hv_mysqldb_health_hostname: localhost
 #icinga_hv_mysqldb_health_username: myuser
 #icinga_hv_mysqldb_health_password: mypassword
 #icinga_hv_mysqldb_health_database: mydbname
 
-# systemd monitoring
-# don't use "icinga_hv_" prefix here, create a list
-# e.g. systemd_services: [nginx, apache2, httpd]
+######################
+# mongodb monitoring #
+######################
+# See: /usr/share/icinga2/include/plugins-contrib.d/databases.conf
+# on the master for a full list of available options
+#icinga_hv_mongodb: true
+#icinga_hv_mongodb_replicaset: myreplsetname
+#icinga_hv_mongodb_replcheck: true
+#icinga_hv_mongodb_action: replica_primary
+#...
 
-# mailq monitoring
-# icinga_hv_mailq: true
+######################
+# haproxy monitoring #
+######################
+# See: /usr/share/icinga2/include/plugins-contrib.d/web.conf
+# on the master for a full list of available options
+#
+# Requirements: 1. stats line in the haproxy.cfg:
+#                  stats socket /run/haproxy/admin.sock user haproxy group nagios mode 660 level operator
+#               
+#               2. switch perl module
+#                  apt install -y libswitch-perl
+#
+#icinga_hv_haproxy_status: true
+#icinga_hv_haproxy_status_socket: /run/haproxy/admin.sock
+
+####################
+# mailq monitoring #
+####################
+#icinga_hv_mailq: true
+
+######################
+# systemd monitoring #
+######################
+# don't use "icinga_hv_" prefix here, create a list
+#systemd_services: [nginx, apache2, httpd]
