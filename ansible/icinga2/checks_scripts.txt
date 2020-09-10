@@ -96,9 +96,78 @@ vars.systemd["nginx"] = {
 vars.systemd["joeblow"] = {
 }
 
-
-
 ### check_service ???
+
+### check_mongodb
+https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/#mongodb
+cd /usr/lib/nagios/plugins && wget https://raw.githubusercontent.com/mzupan/nagios-plugin-mongodb/master/check_mongodb.py
+chmod 755 check_mongodb.py
+modify script to source python3: #!/usr/bin/env python3
+in line 1389 change db.collection_names(): to db.list_collection_names():
+apt install -y python3-pymongo
+
+wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
+sudo apt-get update
+systemctl start mongod
+change bindIp in /etc/mongod.conf to 0.0.0.0
+enable replication in /etc/mongod.conf
+  replication:
+    replSetName: myreplsetname
+ufw allow 27017 && ufw reload
+systemctl restart mongod
+get shell: mongo
+> rs.initiate( {
+ _id: "myreplset",
+ members : [
+ { _id: 0, host: "galera1" },
+ { _id: 1, host: "galera2" },
+ { _id: 2, host: "galera3" }
+ ]
+ })
+{
+
+rs.conf() # shows configuration
+rs.status() # shows who's primary/secondary
+
+# e.g. To check primary status add the following to host.conf:
+(see /usr/share/icinga2/include/plugins-contrib.d/databases.conf for other options)
+vars.mongodb = "true"
+vars.mongodb_replicaset = "myreplset"
+vars.mongodb_replcheck = "true"
+vars.mongodb_action = "replica_primary"
+
+### check_haproxy_status
+https://icinga.com/docs/icinga2/latest/doc/10-icinga-template-library/#haproxy_status
+apt install -y haproxy # done on galera1, galera 2/3 backend nginx
+allow icinga access to the stats socket in /etc/haproxy/haproxy.cfg (added below default stats line)
+stats socket /run/haproxy/admin.sock user haproxy group nagios mode 660 level operator
+frontend myfrontend
+        bind 0.0.0.0:80
+        default_backend webapps
+        option forwardfor
+
+backend webapps
+       balance roundrobin
+       server galera3 192.168.1.224:80 check
+       server galera2 192.168.1.223:80 check
+
+validate configuration: haproxy -f /etc/haproxy/haproxy.cfg -c -V
+
+cd /usr/lib/nagios/plugins && wget https://raw.githubusercontent.com/jonathanio/monitoring-nagios-haproxy/master/check_haproxy
+chmod 755 check_haproxy
+line 138 change .sock file to /var/run/haproxy-master.sock
+apt install -y libswitch-perl
+./check_haproxy -S /run/haproxy/admin.sock
+
+Set vars in host.conf:
+vars.haproxy = "true"
+vars.haproxy_status_socket = "/run/haproxy/admin.sock"
+create haproxy_status.conf
+May want to change the LIMIT_ values accordingly (or pass in an override in the host.conf file?)
+
+### check_rabbitmq
+https://github.com/CaptPhunkosis/check_rabbitmq/blob/master/check_rabbitmq
 
 ### check http/s / certificates
 This can be achieved via vhosts.conf already in /etc/icinga2/zones.d/global-templates/checks/services
