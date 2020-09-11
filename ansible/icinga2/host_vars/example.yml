@@ -53,6 +53,14 @@ site: hav
 ####################
 #icinga_hv_mailq: true
 
+#######################
+# rabbitmq monitoring #
+#######################
+#icinga_hv_rabbitmq: true
+#icinga_hv_rabbitmq_action: aliveness|cluster_status
+#icinga_hv_rabbitmq_username: myusername
+#icinga_hv_rabbitmq_password: mypassword
+
 ######################
 # systemd monitoring #
 ######################
