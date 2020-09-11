@@ -168,6 +168,29 @@ May want to change the LIMIT_ values accordingly (or pass in an override in the 
 
 ### check_rabbitmq
 https://github.com/CaptPhunkosis/check_rabbitmq/blob/master/check_rabbitmq
+https://computingforgeeks.com/how-to-install-latest-rabbitmq-server-on-ubuntu-linux/
+apt install erlang rabbitmq-server
+rabbitmq-plugins enable rabbitmq_management
+ufw allow proto tcp from any to any port 4369,5672,15672,25672
+rabbitmqctl add_user admin yasmine
+rabbitmqctl set_user_tags admin administrator
+http://192.168.1.222:15672/#/ (admin/yasmine)
+# copy cookie to all participating nodes in cluster
+scp /var/lib/rabbitmq/.erlang.cookie galera[2|3]:/var/lib/rabbitmq/
+systemctl restart rabbitmq-server # on nodes 2 and 3
+rabbitmqctl stop_app # on nodes 2 and 3
+rabbitmqctl reset # on nodes 2 and 3
+rabbitmqctl join_cluster rabbit@galera1 # on nodes 2 and 3
+rabbitmqctl start_app # on nodes 2 and 3
+
+cd /usr/lib/nagios/plugins && wget https://raw.githubusercontent.com/CaptPhunkosis/check_rabbitmq/master/check_rabbitmq
+n.b. this is Python2 - for Python3 I ran it through https://www.pythonconverter.com/
+chmod 755 check_rabbitmq
+e.g.
+./check_rabbitmq -a cluster_status -u admin -p yasmine
+./check_rabbitmq -a aliveness
+
+This script needs work for the counts and memory options. It just hangs. Maybe stick to Python2 version?
 
 ### check http/s / certificates
 This can be achieved via vhosts.conf already in /etc/icinga2/zones.d/global-templates/checks/services
